@@ -5,6 +5,7 @@ import type { ITestCaseHookParameter } from './cucumber-types.js'
 import {
     getA11yResultsSummary,
     getA11yResults,
+    performA11yScan,
     getUniqueIdentifier,
     getUniqueIdentifierForCucumber,
     isAccessibilityAutomationSession,
@@ -14,7 +15,8 @@ import {
     validateCapsWithA11y,
     isTrue
 } from './util.js'
-import { testForceStop, testStartEvent, testStop } from './scripts/test-event-scripts.js'
+import { testForceStop, testStartEvent, saveResults } from './scripts/test-event-scripts.js'
+
 import { BStackLogger } from './bstackLogger.js'
 
 class _AccessibilityHandler {
@@ -97,6 +99,10 @@ class _AccessibilityHandler {
         (this._browser as WebdriverIO.Browser).getAccessibilityResults = async () => {
             return await getA11yResults((this._browser as WebdriverIO.Browser), isBrowserstackSession(this._browser), this._accessibility)
         }
+
+        (this._browser as WebdriverIO.Browser).performScan = async () => {
+            return await performA11yScan((this._browser as WebdriverIO.Browser), isBrowserstackSession(this._browser), this._accessibility)
+        }
     }
 
     async beforeTest (suiteTitle: string | undefined, test: Frameworks.Test) {
@@ -116,12 +122,6 @@ class _AccessibilityHandler {
         }
 
         try {
-            if (shouldScanTest) {
-                BStackLogger.info('Setup for Accessibility testing has started. Automate test case execution will begin momentarily.')
-                await this.sendTestStartEvent(this._browser as WebdriverIO.Browser)
-            } else {
-                await this.sendTestForceStopEvent(this._browser as WebdriverIO.Browser)
-            }
             this._testMetadata[testIdentifier].accessibilityScanStarted = shouldScanTest
 
             if (shouldScanTest) {
@@ -265,7 +265,9 @@ class _AccessibilityHandler {
     }
 
     private sendTestStopEvent(browser: WebdriverIO.Browser, dataForExtension: any) {
-        return (browser as WebdriverIO.Browser).executeAsync(testStop, dataForExtension)
+        performA11yScan(browser, true, true)
+
+        return (browser as WebdriverIO.Browser).executeAsync(saveResults, dataForExtension)
     }
 
     private getIdentifier (test: Frameworks.Test | ITestCaseHookParameter) {

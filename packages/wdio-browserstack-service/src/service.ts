@@ -158,6 +158,10 @@ export default class BrowserstackService implements Services.ServiceInstance {
                     await this._percyHandler?.browserBeforeCommand(
                         Object.assign(command, { sessionId }),
                     )
+                    if (this._accessibility) {
+                        // add condition for commands
+                        // performA11yScan((this._browser as WebdriverIO.Browser), isBrowserstackSession(this._browser), true)
+                    }
                 })
 
                 /**

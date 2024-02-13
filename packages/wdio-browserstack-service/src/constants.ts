@@ -60,3 +60,12 @@ export const PERCY_DOM_CHANGING_COMMANDS_ENDPOINTS = [
 ]
 
 export const CAPTURE_MODES = ['click', 'auto', 'screenshot', 'manual', 'testcase']
+
+export const ACCESSIBILITY_COMMANDS_ENDPOINTS = [
+    '/session/:sessionId/url',
+    '/session/:sessionId/forward',
+    '/session/:sessionId/back',
+    '/session/:sessionId/refresh',
+    '/session/:sessionId/screenshot',
+    '/session/:sessionId/actions'
+]
