@@ -2,50 +2,68 @@ import path from 'node:path'
 import fs from 'node:fs'
 import os from 'node:os'
 
-export class Scripts {
-    public static performScan = null
-    public static getResults = null
-    public static getResultsSummary = null
-    public static saveTestResults = null
-    // TODO: Update from response once server changes done
+class AccessibilityScripts {
+    private static instance: AccessibilityScripts | null = null
 
-    // public static commandsToWrap = require('./commands.json')
+    public performScan: string | null = null
+    public getResults: string | null = null
+    public getResultsSummary: string | null = null
+    public saveTestResults: string | null = null
+    public commandsToWrap: Array<any> | null = null
 
-    public static browserstackFolderPath = path.join(os.homedir(), '.browserstack')
-    // public static commandsPath = path.join(this.browserstackFolderPath, "commands.json")
+    public browserstackFolderPath = path.join(os.homedir(), '.browserstack')
+    public commandsPath = path.join(this.browserstackFolderPath, 'commands.json')
 
     constructor() {}
 
-    public static parseFromJson(responseData: { scripts: { scan: null; getResults: null; getResultsSummary: null; saveResults: null; }; }) {
-        // console.log(responseData)
-        if (responseData.scripts) {
-            this.performScan = responseData.scripts.scan
-            this.getResults = responseData.scripts.getResults
-            this.getResultsSummary = responseData.scripts.getResultsSummary
-            this.saveTestResults = responseData.scripts.saveResults
+    public static checkAndGetInstance() {
+        if (!AccessibilityScripts.instance) {
+            AccessibilityScripts.instance = new AccessibilityScripts()
+            AccessibilityScripts.instance.readFromExistingFile()
         }
-
-        // this.commandsToWrap = responseData.commands
+        return AccessibilityScripts.instance
     }
 
-    // public static shouldWrapCommand(method: string) {
-    //   return this.commandsToWrap.findIndex((el: { name: string }) => el.name.toLowerCase() === method.toLowerCase()) != -1
-    // }
+    private readFromExistingFile() {
+        try {
+            if (fs.existsSync(this.commandsPath)) {
+                const data = fs.readFileSync(this.commandsPath, 'utf8')
+                if (data) {
+                    this.update(JSON.parse(data))
+                }
+            }
+        } catch (error: any) {
+            /* Do nothing */
+        }
+    }
 
-    public static toJson() {
+    public update(data: { commands: [any], scripts: { scan: null; getResults: null; getResultsSummary: null; saveResults: null; }; }) {
+        if (data.scripts) {
+            this.performScan = data.scripts.scan
+            this.getResults = data.scripts.getResults
+            this.getResultsSummary = data.scripts.getResultsSummary
+            this.saveTestResults = data.scripts.saveResults
+        }
+        if (data.commands && data.commands.length) {
+            this.commandsToWrap = data.commands
+        }
+    }
 
+    public store() {
         if (!fs.existsSync(this.browserstackFolderPath)){
             fs.mkdirSync(this.browserstackFolderPath)
         }
 
-        // fs.writeFileSync(this.commandsPath, JSON.stringify({
-        //   scripts: {
-        //     scan: this.performScan,
-        //     getResults: this.getResults,
-        //     getResultsSummary: this.getResultsSummary,
-        //     saveResults: this.saveTestResults,
-        //   },
-        //   // commands: this.commandsToWrap
-        // }))
+        fs.writeFileSync(this.commandsPath, JSON.stringify({
+            commands: this.commandsToWrap,
+            scripts: {
+                scan: this.performScan,
+                getResults: this.getResults,
+                getResultsSummary: this.getResultsSummary,
+                saveResults: this.saveTestResults,
+            }
+        }))
     }
 }
+
+export default AccessibilityScripts.checkAndGetInstance()

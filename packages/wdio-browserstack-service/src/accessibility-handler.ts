@@ -1,3 +1,5 @@
+import util from 'node:util'
+
 import type { Capabilities, Frameworks } from '@wdio/types'
 
 import type { ITestCaseHookParameter } from './cucumber-types.js'
@@ -15,7 +17,7 @@ import {
     validateCapsWithA11y,
     isTrue
 } from './util.js'
-import { testForceStop, testStartEvent, saveResults } from './scripts/test-event-scripts.js'
+import accessibilityScripts from './scripts/accessibility-scripts.js'
 
 import { BStackLogger } from './bstackLogger.js'
 
@@ -26,6 +28,8 @@ class _AccessibilityHandler {
     private _accessibility?: boolean
     private _accessibilityOptions?: { [key: string]: any; }
     private _testMetadata: { [key: string]: any; } = {}
+    private static _a11yScanSessionMap: { [key: string]: any; } = {}
+    private _sessionId: string | null = null
 
     constructor (
         private _browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser,
@@ -82,7 +86,8 @@ class _AccessibilityHandler {
         }
     }
 
-    async before () {
+    async before (sessionId: string) {
+        this._sessionId = sessionId
         this._accessibility = isTrue(this._getCapabilityValue(this._caps, 'accessibility', 'browserstack.accessibility'))
 
         if (isBrowserstackSession(this._browser) && isAccessibilityAutomationSession(this._accessibility)) {
@@ -103,6 +108,29 @@ class _AccessibilityHandler {
         (this._browser as WebdriverIO.Browser).performScan = async () => {
             return await performA11yScan((this._browser as WebdriverIO.Browser), isBrowserstackSession(this._browser), this._accessibility)
         }
+
+        if (this._accessibility) {
+            if (Array.isArray(accessibilityScripts.commandsToWrap)) {
+                const that = this
+                accessibilityScripts.commandsToWrap.forEach(async function (command) {
+                    if (command.name && command.class) {
+                        await (that._browser as WebdriverIO.Browser).overwriteCommand(command.name, async function (origFunction: Function, ...args: any[]) {
+                            if (
+                                that._sessionId && AccessibilityHandler._a11yScanSessionMap[that._sessionId] &&
+                                  (
+                                      !command.name.includes('execute') ||
+                                      !AccessibilityHandler.isBrowserstackScript(args.length ? args[0] : null)
+                                  )
+                            ) {
+                                BStackLogger.debug(`Performing scan for ${command.class} ${command.name}`)
+                                await performA11yScan(that._browser, true, true, command.name)
+                            }
+                            return origFunction(...args)
+                        }, command.class === 'Element')
+                    }
+                })
+            }
+        }
     }
 
     async beforeTest (suiteTitle: string | undefined, test: Frameworks.Test) {
@@ -116,6 +144,11 @@ class _AccessibilityHandler {
         const shouldScanTest = shouldScanTestForAccessibility(suiteTitle, test.title, this._accessibilityOptions)
         const testIdentifier = this.getIdentifier(test)
         const isPageOpened = await this.checkIfPageOpened(this._browser, testIdentifier, shouldScanTest)
+
+        if (this._sessionId) {
+            /* For case with multiple tests under onw browser, before hook of 2nd test should change this map value */
+            AccessibilityHandler._a11yScanSessionMap[this._sessionId] = shouldScanTest
+        }
 
         if (!isPageOpened) {
             return
@@ -189,17 +222,16 @@ class _AccessibilityHandler {
         const shouldScanScenario = shouldScanTestForAccessibility(featureData?.name, pickleData.name, this._accessibilityOptions)
         const isPageOpened = await this.checkIfPageOpened(this._browser, uniqueId, shouldScanScenario)
 
+        if (this._sessionId) {
+            /* For case with multiple tests under onw browser, before hook of 2nd test should change this map value */
+            AccessibilityHandler._a11yScanSessionMap[this._sessionId] = shouldScanScenario
+        }
+
         if (!isPageOpened) {
             return
         }
 
         try {
-            if (shouldScanScenario) {
-                BStackLogger.info('Setup for Accessibility testing has started. Automate test case execution will begin momentarily.')
-                await this.sendTestStartEvent(this._browser as WebdriverIO.Browser)
-            } else {
-                await this.sendTestForceStopEvent(this._browser as WebdriverIO.Browser)
-            }
             this._testMetadata[uniqueId].accessibilityScanStarted = shouldScanScenario
 
             if (shouldScanScenario) {
@@ -256,18 +288,11 @@ class _AccessibilityHandler {
      * private methods
      */
 
-    private sendTestStartEvent(browser: WebdriverIO.Browser) {
-        return (browser as WebdriverIO.Browser).executeAsync(testStartEvent)
-    }
-
-    private sendTestForceStopEvent(browser: WebdriverIO.Browser) {
-        return (browser as WebdriverIO.Browser).execute(testForceStop)
-    }
-
-    private sendTestStopEvent(browser: WebdriverIO.Browser, dataForExtension: any) {
-        performA11yScan(browser, true, true)
-
-        return (browser as WebdriverIO.Browser).executeAsync(saveResults, dataForExtension)
+    private async sendTestStopEvent(browser: WebdriverIO.Browser, dataForExtension: any) {
+        BStackLogger.debug('Performing scan before saving results')
+        await performA11yScan(browser, true, true)
+        const results: unknown = await (browser as WebdriverIO.Browser).executeAsync(accessibilityScripts.saveTestResults as string, dataForExtension)
+        BStackLogger.debug(util.format(results as string))
     }
 
     private getIdentifier (test: Frameworks.Test | ITestCaseHookParameter) {
@@ -300,6 +325,20 @@ class _AccessibilityHandler {
         }
 
         return pageOpen
+    }
+
+    private static isBrowserstackScript(script: string | null): Boolean {
+        if (!script) {
+            return true
+        }
+        try {
+            return (
+                script.toLowerCase().indexOf('browserstack_executor') !== -1 ||
+                script.toLowerCase().indexOf('browserstack_accessibility_automation_script') !== -1
+            )
+        } catch (err: any) {
+            return true
+        }
     }
 }
 
