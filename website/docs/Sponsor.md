@@ -55,6 +55,15 @@ You can also try to convince your employer to sponsor WebdriverIO as a business.
     link="https://www.browserstack.com/automation-webdriverio"
 />
 
+<ImageSwitcher
+    lightImageSrc="/img/sponsors/saucelabs_black.svg"
+    darkImageSrc="/img/sponsors/saucelabs_white.svg"
+    alt="Sauce Labs"
+    link="https://www.saucelabs.com"
+    width={400}
+    style={{ marginLeft: '30px', position: 'relative', top: '-8px' }}
+/>
+
 ### 🥇 Gold
 
 Become a [Gold Sponsor](https://opencollective.com/webdriverio/contribute/gold-sponsor-26921/checkout?interval=month&amount=500&contributeAs=me).
@@ -66,8 +75,19 @@ Become a [Gold Sponsor](https://opencollective.com/webdriverio/contribute/gold-s
     darkImageSrc="/img/sponsors/lambdatest_white.svg"
     alt="Lambdatest"
     link="https://www.lambdatest.com/"
+    width="250"
 />
 
+Become a [Silver Sponsor](https://opencollective.com/webdriverio/contribute/silver-sponsor-69223/checkout?interval=month&amount=250&contributeAs=me).
+
 ### 🥉 Bronze
+
+<ImageSwitcher
+    lightImageSrc="/img/sponsors/eslint_black.svg"
+    darkImageSrc="/img/sponsors/eslint_white.svg"
+    alt="Eslint"
+    link="https://eslint.org/"
+    width="150"
+/>
 
 Become a [Bronze Sponsor](https://opencollective.com/webdriverio/contribute/bronze-sponsor-69224/checkout?interval=month&amount=100&contributeAs=me).

@@ -1,9 +1,9 @@
 import path from 'node:path'
-import got from 'got'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 // @ts-ignore mock feature
 import logger, { logMock } from '@wdio/logger'
 import { sessionEnvironmentDetector } from '@wdio/utils'
+import { startWebDriver } from '@wdio/utils'
 import type { Capabilities } from '@wdio/types'
 
 import WebDriver, { getPrototype, DEFAULTS, command } from '../src/index.js'
@@ -18,7 +18,7 @@ vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdi
 vi.mock('fs')
 vi.mock('wait-port')
 vi.mock('ws')
-vi.mock('got')
+vi.mock('fetch')
 
 vi.mock('../src/bidi/core.js', () => {
     let initCount = 0
@@ -51,7 +51,7 @@ const sessionOptions = {
 // @ts-expect-error
 interface TestClient extends Client {
     getUrl (): string
-    getApplicationCacheStatus (): void
+    rotateDevice (): void
     takeElementScreenshot (): void
     getDeviceTime (): void
 }
@@ -85,15 +85,15 @@ describe('WebDriver', () => {
                 capabilities: { browserName: 'firefox' }
             })
 
-            expect(got).toHaveBeenCalledWith(
+            expect(fetch).toHaveBeenCalledWith(
                 expect.objectContaining({ pathname: '/session' }),
-                expect.objectContaining({ json: {
+                expect.objectContaining({ body: JSON.stringify({
                     capabilities: {
                         alwaysMatch: { browserName: 'firefox' },
                         firstMatch: [{}]
                     },
                     desiredCapabilities: { browserName: 'firefox' }
-                } })
+                }) })
             )
         })
 
@@ -106,15 +106,15 @@ describe('WebDriver', () => {
                 }
             })
 
-            expect(got).toHaveBeenCalledWith(
+            expect(fetch).toHaveBeenCalledWith(
                 expect.objectContaining({ pathname: '/session' }),
-                expect.objectContaining({ json: {
+                expect.objectContaining({ body: JSON.stringify({
                     capabilities: {
                         alwaysMatch: { browserName: 'firefox' },
                         firstMatch: [{}]
                     },
                     desiredCapabilities: { browserName: 'firefox' }
-                } })
+                }) })
             )
 
             expect(vi.mocked(sessionEnvironmentDetector).mock.calls)
@@ -150,9 +150,7 @@ describe('WebDriver', () => {
         })
 
         it('attaches bidi handler if socket url is given', async () => {
-            vi.mocked(got).mockResolvedValue({
-                body: { value: { webSocketUrl: 'ws://foo/bar' } }
-            })
+            vi.mocked(fetch).mockResolvedValueOnce(Response.json({ value: { webSocketUrl: 'ws://foo/bar' } }))
             await WebDriver.newSession({
                 path: '/',
                 capabilities: { browserName: 'firefox' }
@@ -165,7 +163,7 @@ describe('WebDriver', () => {
         it('should allow to attach to existing session', async () => {
             const client = WebDriver.attachToSession({ ...sessionOptions, logLevel: 'error' }) as any as TestClient
             await client.getUrl()
-            expect(got).toHaveBeenCalledWith(
+            expect(fetch).toHaveBeenCalledWith(
                 expect.objectContaining({ href: 'http://localhost:4444/session/foobar/url' }),
                 expect.anything()
             )
@@ -175,7 +173,7 @@ describe('WebDriver', () => {
         it('should allow to attach to existing session2', async () => {
             const client = WebDriver.attachToSession({ ...sessionOptions }) as any as TestClient
             await client.getUrl()
-            expect(got).toHaveBeenCalledWith(
+            expect(fetch).toHaveBeenCalledWith(
                 expect.objectContaining({ href: 'http://localhost:4444/session/foobar/url' }),
                 expect.anything()
             )
@@ -189,22 +187,8 @@ describe('WebDriver', () => {
             expect(client.isChrome).toBeFalsy()
             expect(client.isMobile).toBeFalsy()
             expect(client.isSauce).toBeFalsy()
-            expect(client.getApplicationCacheStatus).toBeFalsy()
+            expect(client.rotateDevice).toBeFalsy()
             expect(client.takeElementScreenshot).toBeTruthy()
-            expect(client.getDeviceTime).toBeFalsy()
-        })
-
-        it('should allow to attach to existing session - non W3C', async () => {
-            const client = WebDriver.attachToSession({ ...sessionOptions,
-                isW3C: false,
-                isSauce: true,
-            }) as any as TestClient
-
-            await client.getUrl()
-
-            expect(client.isSauce).toBe(true)
-            expect(client.getApplicationCacheStatus).toBeTruthy()
-            expect(client.takeElementScreenshot).toBeFalsy()
             expect(client.getDeviceTime).toBeFalsy()
         })
 
@@ -218,7 +202,7 @@ describe('WebDriver', () => {
 
             expect(client.isChrome).toBe(true)
             expect(client.isMobile).toBe(true)
-            expect(client.getApplicationCacheStatus).toBeTruthy()
+            expect(client.rotateDevice).toBeTruthy()
             expect(client.takeElementScreenshot).toBeTruthy()
             expect(client.getDeviceTime).toBeTruthy()
         })
@@ -258,7 +242,7 @@ describe('WebDriver', () => {
         it('should apply default connection details', () => {
             const client = WebDriver.attachToSession({ sessionId: '123', port: 4321 })
             expect(client.options.protocol).toBe('http')
-            expect(client.options.hostname).toBe('0.0.0.0')
+            expect(client.options.hostname).toBe('localhost')
             expect(client.options.port).toBe(4321)
             expect(client.options.path).toBe('/')
         })
@@ -289,8 +273,26 @@ describe('WebDriver', () => {
                 path: '/',
                 capabilities: { browserName: 'firefox' }
             })
+            vi.mocked(startWebDriver).mockClear()
             await WebDriver.reloadSession(session)
-            expect(got).toHaveBeenCalledTimes(2)
+            expect(startWebDriver).not.toHaveBeenCalledOnce()
+            expect(fetch).toHaveBeenCalledTimes(2)
+        })
+
+        it('starts a new driver process if browserName is given', async () => {
+            vi.mocked(startWebDriver).mockImplementation((params) => {
+                params.hostname = 'localhost'
+                params.port = 4444
+                return { pid: 1234 } as any
+            })
+            const session = await WebDriver.newSession({
+                path: '/',
+                capabilities: { browserName: 'firefox' }
+            })
+            vi.mocked(startWebDriver).mockClear()
+            await WebDriver.reloadSession(session, { browserName: 'chrome' })
+            expect(startWebDriver).toHaveBeenCalledOnce()
+            expect((session.capabilities as WebdriverIO.Capabilities)['wdio:driverPID']).toBe(1234)
         })
     })
 
@@ -300,7 +302,8 @@ describe('WebDriver', () => {
 
     afterEach(() => {
         vi.mocked(logger.setLevel).mockClear()
-        vi.mocked(got).mockClear()
+        vi.mocked(fetch).mockClear()
         vi.mocked(sessionEnvironmentDetector).mockClear()
+        vi.mocked(startWebDriver).mockClear()
     })
 })

@@ -2,6 +2,7 @@ import os from 'node:os'
 import url from 'node:url'
 import path from 'node:path'
 import { loadEnv } from 'vite'
+import { expect } from '@wdio/globals'
 
 const isMac = os.platform() === 'darwin' && process.env.CI
 const isWindows = os.platform() === 'win32'
@@ -17,7 +18,6 @@ if (process.env.CI && process.env.WDIO_PRESET === 'vue' && (isWindows || isMac))
 }
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
-const browserName = isMac ? 'safari' : 'chrome'
 export const config = {
     /**
      * specify test files
@@ -30,7 +30,11 @@ export const config = {
     /**
      * capabilities
      */
-    capabilities: [{ browserName }],
+    capabilities: [
+        isMac
+            ? { browserName: 'safari' }
+            : { browserName: 'chrome', browserVersion: '122.0.6261.39' }
+    ],
 
     /**
      * test configurations
@@ -64,6 +68,28 @@ export const config = {
         timeout: 150000,
         require: ['./__fixtures__/setup.js']
     },
+
+    /**
+     * in order to test custom matchers added by services, we push a service instance
+     * to the service list
+     */
+    services: [[{
+        before() {
+            expect.extend({
+                toBeFoo(received) {
+                    return received === 'foo'
+                        ? {
+                            message: () => `expected ${received} not to be foo`,
+                            pass: true
+                        }
+                        : {
+                            message: () => `expected ${received} to be foo`,
+                            pass: false
+                        }
+                }
+            })
+        }
+    }, {}]],
 
     before: () => {
         /**

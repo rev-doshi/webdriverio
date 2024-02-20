@@ -162,13 +162,21 @@ Does your company use WebdriverIO? Ask your manager or marketing team if your co
 We are immensely grateful to our exclusive Premium Sponsor for their invaluable support in the development of this project:
 
 <p align="center">
-    <a href="https://www.browserstack.com/automation-webdriverio"><img src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" alt="BrowserStack" /></a>
+    <a href="https://www.browserstack.com/automation-webdriverio"><img src="https://webdriver.io/img/sponsors/browserstack_black.svg" alt="BrowserStack" /></a>
+    &nbsp; &nbsp; &nbsp;
+    <a href="https://saucelabs.com"><img src="https://webdriver.io/img/sponsors/saucelabs_black.svg" alt="Sauce Labs" width=400 /></a>
 </p>
 
 ### 🥈 Silver Sponsor
 
 <p align="center">
-    <a href="https://www.lambdatest.com/"><img src="./.github/sponsors/LambdaTest_Black_Logo.svg" alt="Lambdatest" /></a>
+    <a href="https://www.lambdatest.com/"><img src="https://webdriver.io/img/sponsors/lambdatest_black.svg" width="300" alt="Lambdatest" /></a>
+</p>
+
+### 🥉 Bronze Sponsor
+
+<p align="center">
+    <a href="https://eslint.org/"><img src="https://eslint.org/assets/images/logo/eslint-logo-color.png" alt="Eslint" /></a>
 </p>
 
 ## :page_facing_up: License

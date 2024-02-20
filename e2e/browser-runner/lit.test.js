@@ -73,6 +73,15 @@ describe('Lit Component testing', () => {
         expect(await innerElem.getText()).toBe('Hello Sir, WebdriverIO! Does this work?')
     })
 
+    it('does not stale on elements not found', async () => {
+        const start = Date.now()
+        await expect($('non-existing-element')).not.toBePresent()
+        await expect($('non-existing-element')).not.toBeDisplayed()
+        await expect(await $('non-existing-element')).not.toBePresent()
+        await expect(await $('non-existing-element')).not.toBeDisplayed()
+        expect(Date.now() - start).toBeLessThan(1000)
+    })
+
     it('should support snapshot testing', async () => {
         render(
             html`<simple-greeting name="WebdriverIO" />`,
@@ -81,7 +90,7 @@ describe('Lit Component testing', () => {
 
         const elem = $('simple-greeting')
         await expect(elem).toMatchSnapshot()
-        await expect(elem).toMatchInlineSnapshot(`"<simple-greeting name="WebdriverIO"></simple-greeting>"`)
+        await expect(elem).toMatchInlineSnapshot('"<simple-greeting name="WebdriverIO"></simple-greeting>"')
         await expect(elem.getCSSProperty('background-color')).toMatchSnapshot()
         await expect(elem.getCSSProperty('background-color')).toMatchInlineSnapshot(`
           {
@@ -316,6 +325,19 @@ describe('Lit Component testing', () => {
 
         it('supports custom command registration in before hook', async () => {
             expect(await browser.someCustomCommand()).toBe('Hello World')
+        })
+
+        it('supports custom matchers added by services', async () => {
+            await expect('foo').toBeFoo()
+
+            let error
+            try {
+                await expect('bar').toBeFoo()
+            } catch (err) {
+                error = err
+            }
+
+            expect(error.message).toBe('expected bar to be foo')
         })
 
         describe('a11y selectors', () => {

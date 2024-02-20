@@ -25,3 +25,30 @@ export const showPopupWarning = <T>(name: string, value: T, defaultValue?: T) =>
   \`\`\``)
     return value
 }
+
+export function sanitizeConsoleArgs (args: unknown[]) {
+    return args.map((arg: any) => {
+        try {
+            if (arg && typeof arg.selector === 'string') {
+                return `WebdriverIO.Element<"${arg.selector}">`
+            }
+            if (arg && typeof arg.sessionId === 'string') {
+                return `WebdriverIO.Browser<${arg.capabilities.browserName}>`
+            }
+        } catch (err) {
+            // ignore
+        }
+
+        if (
+            arg instanceof HTMLElement ||
+            (arg && typeof arg === 'object' && typeof arg.then === 'function') ||
+            typeof arg === 'function'
+        ) {
+            return arg.toString()
+        }
+        if (arg instanceof Error) {
+            return arg.stack
+        }
+        return arg
+    })
+}

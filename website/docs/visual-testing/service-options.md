@@ -92,17 +92,17 @@ This can only be done when the device name **CAN** automatically be determined a
 
 -   **Type:** `boolean`
 -   **Mandatory:** No
--   **Default:** `false`
+-   **Default:** `true`
 
-If no baseline image is found during the comparison the image is automatically copied to the baseline folder when this is set to `true`
+If no baseline image is found during the comparison the image is automatically copied to the baseline folder.
 
 ### `baselineFolder`
 
 -   **Type:** `any`
 -   **Mandatory:** No
--   **Default:** `./wic/baseline/`
+-   **Default:** `.path/to/testfile/__snapshots__/`
 
-The directory will hold all the baseline images that are used during the comparison. If not set, the default value will be used. A function that accepts an option object can also be used to set the `baselineFolder` value:
+The directory will hold all the baseline images that are used during the comparison. If not set, the default value will be used which will store the files in a `__snapshots__/`-folder next to the spec that executes the visual tests. A function that accepts an option object can also be used to set the `baselineFolder` value:
 
 ```js
 {
@@ -349,4 +349,4 @@ The width of the line.
 
 ## Compare options
 
-The compare options can be set as service options, see [Method Compare options](./method-options#compare-check-options)
+The compare options can also be set as service options, they are described in the [Method Compare options](./method-options#compare-check-options)
