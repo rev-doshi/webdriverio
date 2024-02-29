@@ -1,3 +1,4 @@
+import got from 'got'
 import dateFormat from 'dateformat'
 import stringify from 'json-stringify-safe'
 
@@ -146,9 +147,9 @@ export default class SumoLogicReporter extends WDIOReporter {
         log.debug('start synchronization')
 
         try {
-            const resp = await fetch(this._options.sourceAddress, {
+            const resp = await got(this._options.sourceAddress, {
                 method: 'POST',
-                body: JSON.stringify(logLines)
+                json: logLines as any
             })
 
             /**
@@ -160,7 +161,7 @@ export default class SumoLogicReporter extends WDIOReporter {
              * reset sync flag so we can sync again
              */
             this._isSynchronising = false
-            return log.debug(`synchronised collector data, server status: ${resp.status}`)
+            return log.debug(`synchronised collector data, server status: ${resp.statusCode}`)
         } catch (err: any) {
             return log.error('failed send data to Sumo Logic:\n', err.stack)
         }

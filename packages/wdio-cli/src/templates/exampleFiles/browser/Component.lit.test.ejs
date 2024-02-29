@@ -17,8 +17,6 @@ describe('Lit component testing', () => {
         await button.click()
         await button.click()
 
-        await expect(button).toHaveText('count is 2')<%-
-        answers.includeVisualTesting ? `
-        await expect(button).toMatchElementSnapshot('counterButton')` : '' %>
+        await expect(button).toHaveText('count is 2')
     })
 })

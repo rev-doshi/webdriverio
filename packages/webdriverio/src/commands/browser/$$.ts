@@ -24,7 +24,7 @@ import type { Selector } from '../../types.js'
  * ```js
  * // print all image sources
  * for await (const img of $$('img')) {
- *   console.log(await img.getAttribute('src'))
+ *   console.log(await img.getAttribute('src))
  * }
  * ```
  *
@@ -58,8 +58,7 @@ export async function $$ (
     if (Array.isArray(selector) && isElement(selector[0])) {
         res = []
         for (const el of selector) {
-            const $el = await findElement.call(this, el)
-            $el && res.push($el)
+            res.push(await findElement.call(this, el))
         }
     }
 

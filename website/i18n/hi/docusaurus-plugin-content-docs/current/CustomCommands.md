@@ -194,9 +194,10 @@ declare namespace WebdriverIO {
 वादे को वापस करते समय, WebdriverIO यह सुनिश्चित करता है कि जब तक वादा पूरा नहीं हो जाता तब तक यह अगले आदेश के साथ जारी नहीं रहेगा। अगर वादा खारिज हो जाता है, तो आदेश एक त्रुटि देगा।
 
 ```js
+import got from 'got'
+
 browser.addCommand('makeRequest', async (url) => {
-    const response = await fetch(url)
-    return await response.json()
+    return got(url).json()
 })
 ```
 

@@ -7,12 +7,12 @@ import type { CommandEndpoint } from '@wdio/protocols'
 import type { Options } from '@wdio/types'
 
 // @ts-expect-error mock feature
-import RequestMock, { thenMock } from '../src/request/request.js'
+import RequestMock, { thenMock } from '../src/request/node.js'
 import commandWrapper from '../src/command.js'
 import type { BaseClient } from '../src/types.js'
 
 vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdio/logger')))
-vi.mock('fetch')
+vi.mock('got')
 
 const log = logger('webdriver')
 const commandPath = '/session/:sessionId/element/:elementId/element'
@@ -48,7 +48,7 @@ const commandEndpoint: CommandEndpoint = {
     }]
 }
 
-vi.mock('../src/request/request', () => {
+vi.mock('../src/request/node', () => {
     const thenMock = vi.fn().mockResolvedValue({ value: 15 })
     return {
         thenMock,

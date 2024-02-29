@@ -10,7 +10,9 @@ import JasmineAdapterFactory, { JasmineAdapter } from '../src/index.js'
 vi.mock('jasmine')
 vi.mock('expect-webdriverio', () => ({
     expect: {},
-    matchers: new Map([['toHaveTitle', vi.fn()]]),
+    matchers: {
+        toHaveTitle: vi.fn()
+    },
     getConfig: vi.fn()
 }))
 vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdio/logger')))
@@ -26,7 +28,7 @@ const AFTER_HOOK_IDX = 3
 globalThis.jasmine = {
     addMatchers: 'addMatchers',
     addAsyncMatchers: 'addAsyncMatchers'
-} as any
+}
 
 const wdioReporter: EventEmitter = {
     write: vi.fn(),

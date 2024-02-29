@@ -1,6 +1,6 @@
 {
   "name": "@wdio/utils",
-  "version": "8.31.1",
+  "version": "8.29.1",
   "description": "A WDIO helper utility to provide several utility functions used across the project.",
   "author": "Christian Bromann <mail@bromann.dev>",
   "homepage": "https://github.com/webdriverio/webdriverio/tree/main/packages/wdio-utils",
@@ -20,7 +20,7 @@
   "types": "./build/index.d.ts",
   "typeScriptVersion": "3.8.3",
   "engines": {
-    "node": ">=18"
+    "node": "^16.13 || >=18"
   },
   "repository": {
     "type": "git",
@@ -37,9 +37,9 @@
     "url": "https://github.com/webdriverio/webdriverio/issues"
   },
   "dependencies": {
-    "@puppeteer/browsers": "^2.0.1",
+    "@puppeteer/browsers": "^1.6.0",
     "@wdio/logger": "8.28.0",
-    "@wdio/types": "8.31.1",
+    "@wdio/types": "8.29.1",
     "decamelize": "^6.0.0",
     "deepmerge-ts": "^5.1.0",
     "edgedriver": "^5.3.5",

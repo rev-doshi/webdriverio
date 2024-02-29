@@ -1,6 +1,7 @@
 import path from 'node:path'
 
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import got from 'got'
 import logger from '@wdio/logger'
 
 import BrowserstackService from '../src/service.js'
@@ -13,7 +14,7 @@ const sessionBaseUrl = 'https://api.browserstack.com/automate/sessions'
 const sessionId = 'session123'
 const sessionIdA = 'session456'
 
-vi.mock('fetch')
+vi.mock('got')
 vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdio/logger')))
 vi.useFakeTimers().setSystemTime(new Date('2020-01-01'))
 vi.mock('uuid', () => ({ v4: () => '123456789' }))
@@ -25,20 +26,18 @@ const log = logger('test')
 let service: BrowserstackService
 let browser: WebdriverIO.Browser | WebdriverIO.MultiRemoteBrowser
 
-const user = 'foo'
-const key = 'bar'
-const encodedAuth = Buffer.from(`${user}:${key}`, 'utf8').toString('base64')
-const headers: any = {
-    'Content-Type': 'application/json; charset=utf-8',
-    Authorization: `Basic ${encodedAuth}`,
-}
-
 beforeEach(() => {
     vi.mocked(log.info).mockClear()
-    vi.mocked(fetch).mockClear()
-    vi.mocked(fetch).mockReturnValue(Promise.resolve(Response.json({ automation_session: {
-        browser_url: 'https://www.browserstack.com/automate/builds/1/sessions/2'
-    } })))
+    vi.mocked(got).mockClear()
+    vi.mocked(got.put).mockClear()
+    vi.mocked(got).mockResolvedValue({
+        body: {
+            automation_session: {
+                browser_url: 'https://www.browserstack.com/automate/builds/1/sessions/2'
+            }
+        }
+    })
+    vi.mocked(got.put).mockResolvedValue({})
 
     browser = {
         execute: vi.fn(),
@@ -70,14 +69,6 @@ beforeEach(() => {
     service = new BrowserstackService({ testObservability: false } as any, [] as any, { user: 'foo', key: 'bar' } as any)
 })
 
-function assertMethodCalls(mock: { mock: { calls: any[] } }, expectedMethod: any, expectedCallCount: any) {
-    const matchingCalls = mock.mock.calls.filter(
-        ([, options]) => options.method === expectedMethod
-    )
-
-    expect(matchingCalls.length).toBe(expectedCallCount)
-}
-
 it('should initialize correctly', () => {
     service = new BrowserstackService({} as any, [] as any, {} as any)
     expect(service['_failReasons']).toEqual([])
@@ -90,7 +81,8 @@ describe('onReload()', () => {
         service['_browser'] = browser
         await service.onReload('1', '2')
         expect(updateSpy).toHaveBeenCalled()
-        expect(vi.mocked(fetch).mock.calls[0][1]?.method).toEqual('PUT')
+        expect(got.put).toHaveBeenCalled()
+        expect(got).toHaveBeenCalled()
         expect(isBrowserstackSessionSpy).toHaveBeenCalled()
     })
 
@@ -101,7 +93,8 @@ describe('onReload()', () => {
         const updateSpy = vi.spyOn(service, '_update')
         await service.onReload('1', '2')
         expect(updateSpy).toHaveBeenCalled()
-        expect(vi.mocked(fetch).mock.calls[0][1]?.method).toEqual('PUT')
+        expect(got.put).toHaveBeenCalled()
+        expect(got).toHaveBeenCalled()
         expect(isBrowserstackSessionSpy).toHaveBeenCalled()
     })
 
@@ -199,17 +192,19 @@ describe('_multiRemoteAction', () => {
 })
 
 describe('_update', () => {
-    describe('should call fetch with put method', () => {
+    describe('should call got.put', () => {
         const getCloudProviderSpy = vi.spyOn(utils, 'getCloudProvider').mockReturnValue('browserstack')
 
         beforeEach(() => {
+            vi.mocked(got.put).mockClear()
+            vi.mocked(got).mockClear()
             getCloudProviderSpy.mockClear()
         })
 
         it('should resolve if not a browserstack session', () => {
             service['_browser'] = browser
             service._update('sessionId', {})
-            expect(vi.mocked(fetch).mock.calls[0][1]?.method).toEqual('PUT')
+            expect(got.put).toBeCalledTimes(1)
         })
 
         afterEach(() => {
@@ -225,9 +220,9 @@ describe('_printSessionURL', () => {
         const logInfoSpy = vi.spyOn(log, 'info').mockImplementation((string) => string)
         const isBrowserstackSessionSpy = vi.spyOn(utils, 'isBrowserstackSession').mockReturnValue(true)
         await service._printSessionURL()
-        expect(fetch).toHaveBeenCalledWith(
+        expect(got).toHaveBeenCalledWith(
             `${sessionBaseUrl}/${sessionId}.json`,
-            { method: 'GET', headers })
+            { username: 'foo', password: 'bar', responseType: 'json' })
         expect(logInfoSpy).toHaveBeenCalled()
         expect(logInfoSpy).toHaveBeenCalledWith(
             'OS X Sierra chrome session: https://www.browserstack.com/automate/builds/1/sessions/2'
@@ -241,7 +236,9 @@ describe('_printSessionURL', () => {
         const logInfoSpy = vi.spyOn(log, 'info').mockImplementation((string) => string)
         const isBrowserstackSessionSpy = vi.spyOn(utils, 'isBrowserstackSession').mockReturnValue(true)
         await service._printSessionURL()
-        expect(fetch).toHaveBeenCalledWith(`${sessionBaseUrl}/${sessionIdA}.json`, { method: 'GET', headers })
+        expect(got).toHaveBeenCalledWith(
+            `${sessionBaseUrl}/${sessionIdA}.json`,
+            { username: 'foo', password: 'bar', responseType: 'json' })
         expect(logInfoSpy).toHaveBeenCalled()
         expect(logInfoSpy).toHaveBeenCalledWith(
             'Windows 10 chrome session: https://www.browserstack.com/automate/builds/1/sessions/2'
@@ -276,18 +273,22 @@ describe('_printSessionURL', () => {
 
 describe('_printSessionURL Appium', () => {
     beforeEach(() => {
-        vi.mocked(fetch).mockReturnValueOnce(Promise.resolve(Response.json({ automation_session: {
-            name: 'Smoke Test',
-            duration: 65,
-            os: 'ios',
-            os_version: '12.1',
-            browser_version: 'app',
-            browser: null,
-            device: 'iPhone XS',
-            status: 'failed',
-            reason: 'CLIENT_STOPPED_SESSION',
-            browser_url: 'https://app-automate.browserstack.com/builds/1/sessions/2'
-        } })))
+        vi.mocked(got).mockResolvedValue({
+            body: {
+                automation_session: {
+                    name: 'Smoke Test',
+                    duration: 65,
+                    os: 'ios',
+                    os_version: '12.1',
+                    browser_version: 'app',
+                    browser: null,
+                    device: 'iPhone XS',
+                    status: 'failed',
+                    reason: 'CLIENT_STOPPED_SESSION',
+                    browser_url: 'https://app-automate.browserstack.com/builds/1/sessions/2'
+                }
+            }
+        })
 
         browser.capabilities = {
             device: 'iPhone XS',
@@ -309,16 +310,17 @@ describe('_printSessionURL Appium', () => {
 
 describe('_printSessionURL TurboScale', () => {
     beforeEach(() => {
-
-        vi.mocked(fetch).mockReturnValueOnce(Promise.resolve(Response.json({
-            name: 'Smoke Test',
-            duration: 65,
-            browser_version: '116',
-            browser: 'chrome',
-            status: 'failed',
-            reason: 'CLIENT_STOPPED_SESSION',
-            url: 'https://grid.browserstack.com/dashboard/builds/1/sessions/2'
-        })))
+        vi.mocked(got).mockResolvedValue({
+            body: {
+                name: 'Smoke Test',
+                duration: 65,
+                browser_version: '116',
+                browser: 'chrome',
+                status: 'failed',
+                reason: 'CLIENT_STOPPED_SESSION',
+                url: 'https://grid.browserstack.com/dashboard/builds/1/sessions/2'
+            }
+        })
 
         browser.capabilities = {
             browserName: 'chrome',
@@ -566,12 +568,12 @@ describe('beforeSuite', () => {
         await service.beforeSuite({ title: 'foobar' } as any)
         expect(service['_suiteTitle']).toBe('foobar')
         expect(service['_fullTitle']).toBe('foobar')
-        expect(fetch).toBeCalledWith(
+        expect(got.put).toBeCalledWith(
             `${sessionBaseUrl}/${sessionId}.json`,
             {
-                method: 'PUT',
-                body: JSON.stringify({ name: 'foobar' }),
-                headers
+                json: { name: 'foobar' },
+                username: 'foo',
+                password: 'bar'
             }
         )
     })
@@ -583,15 +585,13 @@ describe('beforeSuite', () => {
         await service.beforeSuite({ title: jasmineSuiteTitle } as any)
         expect(service['_suiteTitle']).toBe(jasmineSuiteTitle)
         expect(service['_fullTitle']).toBeUndefined()
-        expect(fetch).not.toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
-            method: 'POST',
-        }))
+        expect(got.put).not.toBeCalled()
     })
 
     it('should not send request to set the session name if option setSessionName is false', async () => {
         const service = new BrowserstackService({ setSessionName: false } as any, [] as any, { user: 'foo', key: 'bar' } as any)
         await service.beforeSuite({ title: 'Project Title' } as any)
-        expect(fetch).not.toBeCalled()
+        expect(got.put).not.toBeCalled()
     })
 })
 
@@ -600,7 +600,7 @@ describe('beforeTest', () => {
         const service = new BrowserstackService({ setSessionName: false } as any, [] as any, { user: 'foo', key: 'bar' } as any)
         await service.beforeSuite({ title: 'Project Title' } as any)
         await service.beforeTest({ title: 'Test Title', parent: 'Suite Title' } as any)
-        expect(fetch).not.toBeCalled()
+        expect(got.put).not.toBeCalled()
     })
 
     describe('sessionNamePrependTopLevelSuiteTitle is true', () => {
@@ -611,21 +611,21 @@ describe('beforeTest', () => {
             expect(service['_fullTitle']).toBe('Project Title')
             await service.beforeTest({ title: 'Test Title', parent: 'Suite Title' } as any)
             expect(service['_fullTitle']).toBe('Project Title - Suite Title - Test Title')
-            assertMethodCalls(vi.mocked(fetch), 'PUT', 2)
-            expect(fetch).toBeCalledWith(
+            expect(got.put).toBeCalledTimes(2)
+            expect(got.put).toBeCalledWith(
                 `${sessionBaseUrl}/${sessionId}.json`,
                 {
-                    method: 'PUT',
-                    body: JSON.stringify({ name: 'Project Title' }),
-                    headers
+                    json: { name: 'Project Title' },
+                    username: 'foo',
+                    password: 'bar'
                 }
             )
-            expect(fetch).toBeCalledWith(
+            expect(got.put).toBeCalledWith(
                 `${sessionBaseUrl}/${sessionId}.json`,
                 {
-                    method: 'PUT',
-                    body: JSON.stringify({ name: 'Project Title - Suite Title - Test Title' }),
-                    headers
+                    json: { name: 'Project Title - Suite Title - Test Title' },
+                    username: 'foo',
+                    password: 'bar'
                 }
             )
         })
@@ -643,13 +643,13 @@ describe('beforeTest', () => {
             expect(service['_fullTitle']).toBe('Suite Title')
             await service.afterTest({ title: 'bar', parent: 'Suite Title' } as any, undefined as never, {} as any)
             expect(service['_fullTitle']).toBe('Suite Title')
-            assertMethodCalls(vi.mocked(fetch), 'PUT', 1)
-            expect(fetch).toBeCalledWith(
+            expect(got.put).toBeCalledTimes(1)
+            expect(got.put).toBeCalledWith(
                 `${sessionBaseUrl}/${sessionId}.json`,
                 {
-                    method: 'PUT',
-                    body: JSON.stringify({ name: 'Suite Title' }),
-                    headers
+                    json: { name: 'Suite Title' },
+                    username: 'foo',
+                    password: 'bar'
                 }
             )
         })
@@ -665,21 +665,21 @@ describe('beforeTest', () => {
             expect(service['_fullTitle']).toBe('Project Title')
             await service.beforeTest({ title: 'Test Title', parent: 'Suite Title' } as any)
             expect(service['_fullTitle']).toBe('Project Title - Suite Title')
-            assertMethodCalls(vi.mocked(fetch), 'PUT', 2)
-            expect(fetch).toBeCalledWith(
+            expect(got.put).toBeCalledTimes(2)
+            expect(got.put).toBeCalledWith(
                 `${sessionBaseUrl}/${sessionId}.json`,
                 {
-                    method: 'PUT',
-                    body: JSON.stringify({ name: 'Project Title' }),
-                    headers
+                    json: { name: 'Project Title' },
+                    username: 'foo',
+                    password: 'bar'
                 }
             )
-            expect(fetch).toBeCalledWith(
+            expect(got.put).toBeCalledWith(
                 `${sessionBaseUrl}/${sessionId}.json`,
                 {
-                    method: 'PUT',
-                    body: JSON.stringify({ name: 'Project Title - Suite Title' }),
-                    headers
+                    json: { name: 'Project Title - Suite Title' },
+                    username: 'foo',
+                    password: 'bar'
                 }
             )
         })
@@ -710,21 +710,21 @@ describe('beforeTest', () => {
             expect(service['_fullTitle']).toBe('barfoo - foobar - Suite Title')
             await service.beforeTest({ title: 'Test Title', parent: 'Suite Title' } as any)
             expect(service['_fullTitle']).toBe('barfoo - foobar - Suite Title - Test Title')
-            assertMethodCalls(vi.mocked(fetch), 'PUT', 2)
-            expect(fetch).toBeCalledWith(
+            expect(got.put).toBeCalledTimes(2)
+            expect(got.put).toBeCalledWith(
                 `${sessionBaseUrl}/${sessionId}.json`,
                 {
-                    method: 'PUT',
-                    body: JSON.stringify({ name: 'barfoo - foobar - Suite Title' }),
-                    headers
+                    json: { name: 'barfoo - foobar - Suite Title' },
+                    username: 'foo',
+                    password: 'bar'
                 }
             )
-            expect(fetch).toBeCalledWith(
+            expect(got.put).toBeCalledWith(
                 `${sessionBaseUrl}/${sessionId}.json`,
                 {
-                    method: 'PUT',
-                    body: JSON.stringify({ name: 'barfoo - foobar - Suite Title - Test Title' }),
-                    headers
+                    json: { name: 'barfoo - foobar - Suite Title - Test Title' },
+                    username: 'foo',
+                    password: 'bar'
                 }
             )
         })
@@ -737,12 +737,12 @@ describe('beforeTest', () => {
             await service.beforeTest({ fullName: 'foo bar baz', description: 'baz' } as any)
             service.afterTest({ fullName: 'foo bar baz', description: 'baz' } as any, undefined as never, {} as any)
             expect(service['_fullTitle']).toBe('foo bar')
-            expect(fetch).toBeCalledWith(
+            expect(got.put).toBeCalledWith(
                 `${sessionBaseUrl}/${sessionId}.json`,
                 {
-                    method: 'PUT',
-                    body: JSON.stringify({ name: 'foo bar' }),
-                    headers
+                    json: { name: 'foo bar' },
+                    username: 'foo',
+                    password: 'bar'
                 }
             )
         })
@@ -755,12 +755,12 @@ describe('beforeTest', () => {
             service.afterTest({ fullName: 'foo bar baz', description: 'baz' } as any, undefined as never, {} as any)
             service.afterTest({ fullName: 'foo xyz', description: 'xyz' } as any, undefined as never, {} as any)
             expect(service['_fullTitle']).toBe('foo')
-            expect(fetch).toBeCalledWith(
+            expect(got.put).toBeCalledWith(
                 `${sessionBaseUrl}/${sessionId}.json`,
                 {
-                    method: 'PUT',
-                    body: JSON.stringify({ name: 'foo' }),
-                    headers
+                    json: { name: 'foo' },
+                    username: 'foo',
+                    password: 'bar'
                 }
             )
         })
@@ -929,12 +929,12 @@ describe('after', () => {
                 status: 'passed',
                 name: 'foo - bar'
             })
-        expect(fetch).toHaveBeenCalledWith(
+        expect(got.put).toHaveBeenCalledWith(
             `${sessionBaseUrl}/${sessionId}.json`,
-            { method: 'PUT', body: JSON.stringify({
+            { json: {
                 status: 'passed',
                 name: 'foo - bar'
-            }), headers })
+            }, username: 'foo', password: 'bar' })
     })
 
     it('should call _update when session has errors (exit code 1)', async () => {
@@ -951,13 +951,13 @@ describe('after', () => {
                 name: 'foo - bar',
                 reason: 'I am failure'
             })
-        expect(fetch).toHaveBeenCalledWith(
+        expect(got.put).toHaveBeenCalledWith(
             `${sessionBaseUrl}/${sessionId}.json`,
-            { method: 'PUT', body: JSON.stringify({
+            { json: {
                 status: 'failed',
                 name: 'foo - bar',
                 reason: 'I am failure'
-            }), headers })
+            }, username: 'foo', password: 'bar' })
     })
 
     it('should call _update with failed when session has no errors (exit code 0) but no tests ran', async () => {
@@ -974,12 +974,12 @@ describe('after', () => {
                 status: 'failed',
                 name: 'foo - bar'
             })
-        expect(fetch).toHaveBeenCalledWith(
+        expect(got.put).toHaveBeenCalledWith(
             `${sessionBaseUrl}/${sessionId}.json`,
-            { method: 'PUT', body: JSON.stringify({
+            { json: {
                 status: 'failed',
                 name: 'foo - bar'
-            }), headers })
+            }, username: 'foo', password: 'bar' })
     })
 
     it('should not set session status if option setSessionStatus is false', async () => {
@@ -992,9 +992,7 @@ describe('after', () => {
         await service.after(1)
 
         expect(updateSpy).not.toHaveBeenCalled()
-        expect(fetch).not.toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
-            method: 'POST',
-        }))
+        expect(got.put).not.toHaveBeenCalled()
     })
 
     it('should not set session name if option setSessionName is false', async () => {
@@ -1009,9 +1007,9 @@ describe('after', () => {
         await service.after(0)
 
         expect(updateSpy).toHaveBeenCalledWith(service['_browser']?.sessionId, { status: 'passed' })
-        expect(fetch).toHaveBeenCalledWith(
+        expect(got.put).toHaveBeenCalledWith(
             `${sessionBaseUrl}/${sessionId}.json`,
-            { method: 'PUT', body: JSON.stringify({ status: 'passed' }), headers })
+            { json: { status: 'passed' }, username: 'foo', password: 'bar' })
     })
 
     describe('Cucumber only', function () {

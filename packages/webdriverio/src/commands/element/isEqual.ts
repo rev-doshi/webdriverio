@@ -37,11 +37,7 @@ export async function isEqual (
 
     // mobile native
     if (browser.isMobile) {
-        /**
-         * some Appium platforms don't support the `getContext` method, in that case
-         * we can't determine if we are in a native context or not, so we return undefined
-         */
-        const context = await browser.getContext().catch(() => undefined)
+        const context = await browser.getContext()
         const contextId = typeof context === 'string'
             ? context
             : context?.id

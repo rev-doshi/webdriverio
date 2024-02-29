@@ -2,9 +2,11 @@ import path from 'node:path'
 import { ELEMENT_KEY } from 'webdriver'
 import { expect, describe, it, vi } from 'vitest'
 
+// @ts-ignore mocked (original defined in webdriver package)
+import got from 'got'
 import { remote } from '../../../src/index.js'
 
-vi.mock('fetch')
+vi.mock('got')
 vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdio/logger')))
 
 describe('elem.react$', () => {
@@ -24,7 +26,7 @@ describe('elem.react$', () => {
         }
         await elem.react$$('MyComp', options)
         expect(elem.elementId).toBe('some-elem-123')
-        expect(JSON.parse(vi.mocked(fetch).mock.calls.pop()![1]!.body as any).args)
+        expect(vi.mocked(got).mock.calls.pop()![1]!.json.args)
             .toEqual([
                 'MyComp',
                 { some: 'props' },
@@ -48,7 +50,7 @@ describe('elem.react$', () => {
 
         await elem.react$$('MyComp')
         expect(elem.elementId).toBe('some-elem-123')
-        expect(JSON.parse(vi.mocked(fetch).mock.calls.pop()![1]!.body as any).args).toEqual([
+        expect(vi.mocked(got).mock.calls.pop()![1]!.json.args).toEqual([
             'MyComp',
             {},
             {},

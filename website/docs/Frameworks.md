@@ -307,7 +307,7 @@ Abort the run on first failure.
 Type: `boolean`<br />
 Default: `false`
 
-#### name
+#### names
 Only execute the scenarios with name matching the expression (repeatable).
 
 Type: `RegExp[]`<br />

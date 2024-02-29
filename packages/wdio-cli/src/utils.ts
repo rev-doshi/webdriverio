@@ -633,10 +633,7 @@ export function specifyVersionIfNeeded(packagesToInstall: string[], version: str
     const { value } = version.matchAll(VERSION_REGEXP).next()
     const [major, minor, patch, tagName, build] = (value || []).slice(1, -1) // drop commit bit
     return packagesToInstall.map((p) => {
-        if (
-            (p.startsWith('@wdio') && p !== '@wdio/visual-service') ||
-            ['devtools', 'webdriver', 'webdriverio'].includes(p)
-        ) {
+        if (p.startsWith('@wdio') || ['devtools', 'webdriver', 'webdriverio'].includes(p)) {
             const tag = major && npmTag === 'latest'
                 ? `^${major}.${minor}.${patch}-${tagName}.${build}`
                 : npmTag
@@ -721,7 +718,7 @@ export async function createPackageJSON(parsedAnswers: ParsedAnswers) {
             dependencies: {},
             devDependencies: {}
         }, null, 2))
-        console.log(chalk.green(chalk.bold('✔ Success!\n')))
+        console.log(chalk.green.bold('✔ Success!\n'))
     }
 }
 
@@ -748,13 +745,6 @@ export async function npmInstall(parsedAnswers: ParsedAnswers, npmTag: string) {
      */
     if (presetPackage.short === 'solid') {
         parsedAnswers.packagesToInstall.push('solid-js')
-    }
-
-    /**
-     * add visual service if user selected support for it
-     */
-    if (parsedAnswers.includeVisualTesting) {
-        parsedAnswers.packagesToInstall.push('@wdio/visual-service')
     }
 
     /**
@@ -818,7 +808,7 @@ export async function npmInstall(parsedAnswers: ParsedAnswers, npmTag: string) {
         console.log(`Installing packages using ${pm}:${SEP}${parsedAnswers.packagesToInstall.join(SEP)}`)
         const success = await installPackages(cwd, parsedAnswers.packagesToInstall, true)
         if (success) {
-            console.log(chalk.green(chalk.bold('✔ Success!\n')))
+            console.log(chalk.green.bold('✔ Success!\n'))
         }
     } else {
         const installationCommand = getInstallCommand(pm, parsedAnswers.packagesToInstall, true)
@@ -846,17 +836,9 @@ export function detectPackageManager(argv = process.argv) {
 export async function setupTypeScript(parsedAnswers: ParsedAnswers) {
     /**
      * don't create a `tsconfig.json` if user doesn't want to use TypeScript
+     * or if a `tsconfig.json` already exists
      */
-    if (!parsedAnswers.isUsingTypeScript) {
-        return
-    }
-
-    /**
-     * don't set up TypeScript if a `tsconfig.json` already exists but ensure we install `ts-node`
-     * as it is a requirement for running TypeScript tests
-     */
-    if (parsedAnswers.hasRootTSConfig) {
-        parsedAnswers.packagesToInstall.push('ts-node')
+    if (!parsedAnswers.isUsingTypeScript || parsedAnswers.hasRootTSConfig) {
         return
     }
 
@@ -954,7 +936,7 @@ export async function setupTypeScript(parsedAnswers: ParsedAnswers) {
         JSON.stringify(config, null, 4)
     )
 
-    console.log(chalk.green(chalk.bold('✔ Success!\n')))
+    console.log(chalk.green.bold('✔ Success!\n'))
 }
 
 function getPreset (parsedAnswers: ParsedAnswers) {
@@ -1007,7 +989,7 @@ export async function setupBabel(parsedAnswers: ParsedAnswers) {
                 ]
             }, null, 4)}`
         )
-        console.log(chalk.green(chalk.bold('✔ Success!\n')))
+        console.log(chalk.green.bold('✔ Success!\n'))
     }
 }
 
@@ -1020,12 +1002,12 @@ export async function createWDIOConfig(parsedAnswers: ParsedAnswers) {
             _: new EjsHelpers({ useEsm: parsedAnswers.esmSupport, useTypeScript: parsedAnswers.isUsingTypeScript })
         })
         await fs.writeFile(parsedAnswers.wdioConfigPath, renderedTpl)
-        console.log(chalk.green(chalk.bold('✔ Success!\n')))
+        console.log(chalk.green.bold('✔ Success!\n'))
 
         if (parsedAnswers.generateTestFiles) {
             console.log('Autogenerating test files...')
             await generateTestFiles(parsedAnswers)
-            console.log(chalk.green(chalk.bold('✔ Success!\n')))
+            console.log(chalk.green.bold('✔ Success!\n'))
         }
     } catch (err: any) {
         throw new Error(`⚠️ Couldn't write config file: ${err.stack}`)
@@ -1083,7 +1065,7 @@ export async function createWDIOScript(parsedAnswers: ParsedAnswers) {
             return false
         }
     }
-    console.log(chalk.green(chalk.bold('✔ Success!')))
+    console.log(chalk.green.bold('✔ Success!'))
     return true
 }
 

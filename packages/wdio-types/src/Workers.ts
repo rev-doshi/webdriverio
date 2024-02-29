@@ -85,8 +85,6 @@ export enum MESSAGE_TYPES {
     hookResultMessage,
     expectRequestMessage,
     expectResponseMessage,
-    expectMatchersRequest,
-    expectMatchersResponse,
     coverageMap,
     customCommand,
     initiateBrowserStateRequest,
@@ -111,8 +109,6 @@ export type SocketMessageValue = {
     [MESSAGE_TYPES.hookResultMessage]: HookResultEvent
     [MESSAGE_TYPES.expectRequestMessage]: ExpectRequestEvent
     [MESSAGE_TYPES.expectResponseMessage]: ExpectResponseEvent
-    [MESSAGE_TYPES.expectMatchersRequest]: never
-    [MESSAGE_TYPES.expectMatchersResponse]: ExpectMatchersResponse
     [MESSAGE_TYPES.coverageMap]: any
     [MESSAGE_TYPES.customCommand]: CustomCommandEvent
     [MESSAGE_TYPES.initiateBrowserStateRequest]: BrowserStateRequest
@@ -131,10 +127,6 @@ export interface ConsoleEvent {
     type: 'log' | 'info' | 'warn' | 'debug' | 'error'
     args: unknown[]
     cid: string
-}
-
-export interface ExpectMatchersResponse {
-    matchers: string[]
 }
 
 export interface BrowserTestResults {

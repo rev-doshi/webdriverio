@@ -1,9 +1,11 @@
 import path from 'node:path'
 import { expect, describe, it, vi, beforeEach } from 'vitest'
 
+// @ts-ignore mocked (original defined in webdriver package)
+import got from 'got'
 import { remote } from '../../../src/index.js'
 
-vi.mock('fetch')
+vi.mock('got')
 vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdio/logger')))
 
 describe('waitForDisplayed', () => {
@@ -11,7 +13,7 @@ describe('waitForDisplayed', () => {
     let browser: WebdriverIO.Browser
 
     beforeEach(async () => {
-        vi.mocked(fetch).mockClear()
+        vi.mocked(got).mockClear()
 
         browser = await remote({
             baseUrl: 'http://foobar.com',
@@ -42,8 +44,7 @@ describe('waitForDisplayed', () => {
         const result = await elem.waitForDisplayed({ timeout })
 
         expect(result).toBe(true)
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[2][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[2][0]!.pathname)
             .toBe('/session/foobar-123/execute/sync')
     })
 
@@ -67,7 +68,7 @@ describe('waitForDisplayed', () => {
 
     it('should call isDisplayed and return false', async () => {
         // @ts-ignore uses expect-webdriverio
-        expect.assertions(2)
+        expect.assertions(1)
         const tmpElem = await browser.$('#foo')
         const elem = {
             selector: '#foo',
@@ -79,12 +80,10 @@ describe('waitForDisplayed', () => {
         } as any as WebdriverIO.Element
 
         try {
-            await elem.waitForDisplayed({ timeout, withinViewport: true })
+            await elem.waitForDisplayed({ timeout })
         } catch (err: any) {
-            expect(err.message).toBe(`element ("#foo") still not displayed within viewport after ${timeout}ms`)
+            expect(err.message).toBe(`element ("#foo") still not displayed after ${timeout}ms`)
         }
-
-        expect(elem.isDisplayed).toBeCalledWith({ withinViewport: true })
     })
 
     it('should not call isDisplayed and return false if never found', async () => {

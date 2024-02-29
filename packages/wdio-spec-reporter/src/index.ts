@@ -1,11 +1,12 @@
-import prettyMs from 'pretty-ms'
 import { format } from 'node:util'
-import type { Capabilities } from '@wdio/types'
-import { Chalk, type ChalkInstance } from 'chalk'
-import WDIOReporter, { TestStats } from '@wdio/reporter'
+import chalk from 'chalk'
+import prettyMs from 'pretty-ms'
 import type { SuiteStats, HookStats, RunnerStats, Argument } from '@wdio/reporter'
+import WDIOReporter, { TestStats } from '@wdio/reporter'
+import type { Capabilities } from '@wdio/types'
+
 import { buildTableData, printTable, getFormattedRows, sauceAuthenticationToken } from './utils.js'
-import { ChalkColors, type SpecReporterOptions, type TestLink, type StateCount, type Symbols, State } from './types.js'
+import type { StateCount, Symbols, SpecReporterOptions, TestLink } from './types.js'
 
 const DEFAULT_INDENT = '   '
 
@@ -42,7 +43,7 @@ export default class SpecReporter extends WDIOReporter {
         pending: '?',
         failed: '✖'
     }
-    private _chalk: ChalkInstance
+
     private _onlyFailures = false
     private _sauceLabsSharableLinks = true
 
@@ -68,16 +69,7 @@ export default class SpecReporter extends WDIOReporter {
                 return this._originalStdoutWrite(chunk, encoding, callback)
             }
         }
-        this._chalk = new Chalk(options.color === false ? { level:0 } : {})
-    }
 
-    /**
-     * @param state state of test execution
-     * @param msg the message to print in terminal
-     * @returns colord value based on chalk to print in terminal
-     */
-    setMessageColor(message:string, state?: State): string{
-        return this._chalk[this.getColor(state)](message)
     }
 
     onRunnerStart (runner: RunnerStats) {
@@ -142,7 +134,7 @@ export default class SpecReporter extends WDIOReporter {
             return
         }
 
-        const title = stat.title, state = (stat as TestStats).state as State
+        const title = stat.title, state = (stat as TestStats).state
         const divider = '------------------------------------------------------------------'
 
         const indent = (stat.type==='test') ?
@@ -156,8 +148,8 @@ export default class SpecReporter extends WDIOReporter {
 
         const content = stat.type === 'test'
             ? `${this._preface} ${indent}` +
-              `${this.setMessageColor(this.getSymbol(state), state)} ${title}` +
-              ` » ${this.setMessageColor('[', state)} ${this._suiteName} ${this.setMessageColor(']', state)}`
+              `${chalk[this.getColor(state)](this.getSymbol(state))} ${title}` +
+              ` » ${chalk[this.getColor(state)]('[')} ${this._suiteName} ${chalk[this.getColor(state)](']')}`
             : stat.type !== 'hook' ?
                 `${suiteStartBanner}${this._preface} ${title}` :
                 title
@@ -359,24 +351,24 @@ export default class SpecReporter extends WDIOReporter {
             // display suite description (Cucumber only)
             if (suite.description) {
                 output.push(...suite.description.trim().split('\n')
-                    .map((l) => `${suiteIndent}${this.setMessageColor(l.trim())}`))
+                    .map((l) => `${suiteIndent}${chalk.grey(l.trim())}`))
                 output.push('') // empty line
             }
 
             // display suite rule (Cucumber only)
             if (suite.rule) {
                 output.push(...suite.rule.trim().split('\n')
-                    .map((l) => `${suiteIndent}${this.setMessageColor(l.trim())}`))
+                    .map((l) => `${suiteIndent}${chalk.grey(l.trim())}`))
             }
 
             const eventsToReport = this.getEventsToReport(suite)
             for (const test of eventsToReport) {
                 const testTitle = `${test.title} ${(test instanceof TestStats && test.retries && test.retries > 0) ? `(${test.retries} retries)` : ''}`
-                const state = test.state as State
+                const state = test.state
                 const testIndent = `${DEFAULT_INDENT}${suiteIndent}`
 
                 // Output for a single test
-                output.push(`${testIndent}${this.setMessageColor(this.getSymbol(state), state)} ${testTitle.trim()}`)
+                output.push(`${testIndent}${chalk[this.getColor(state)](this.getSymbol(state))} ${testTitle.trim()}`)
 
                 // print cucumber data table cells and docstring
                 const arg = (test as TestStats).argument
@@ -435,21 +427,21 @@ export default class SpecReporter extends WDIOReporter {
         // Get the passes
         if (this._stateCounts.passed > 0) {
             const text = `${this._stateCounts.passed} passing ${duration}`
-            output.push(this.setMessageColor(text, State.PASSED))
+            output.push(chalk[this.getColor('passed')](text))
             duration = ''
         }
 
         // Get the failures
         if (this._stateCounts.failed > 0) {
             const text = `${this._stateCounts.failed} failing ${duration}`.trim()
-            output.push(this.setMessageColor(text, State.FAILED))
+            output.push(chalk[this.getColor('failed')](text))
             duration = ''
         }
 
         // Get the skipped tests
         if (this._stateCounts.skipped > 0) {
             const text = `${this._stateCounts.skipped} skipped ${duration}`.trim()
-            output.push(this.setMessageColor(text, State.SKIPPED))
+            output.push(chalk[this.getColor('skipped')](text))
         }
 
         return output
@@ -468,7 +460,7 @@ export default class SpecReporter extends WDIOReporter {
             const suiteTitle = suite.title
             const eventsToReport = this.getEventsToReport(suite)
             for (const test of eventsToReport) {
-                if (test.state !== State.FAILED) {
+                if (test.state !== 'failed') {
                     continue
                 }
 
@@ -482,10 +474,10 @@ export default class SpecReporter extends WDIOReporter {
                 )
                 for (const error of errors) {
                     !error?.stack?.includes('new AssertionError')
-                        ? output.push(this.setMessageColor(error.message, State.FAILED))
+                        ? output.push(chalk.red(error.message))
                         : output.push(...error.message.split('\n'))
                     if (error.stack) {
-                        output.push(...error.stack.split(/\n/g).map(value => this.setMessageColor(value)))
+                        output.push(...error.stack.split(/\n/g).map(value => chalk.gray(value)))
                     }
                 }
             }
@@ -565,20 +557,20 @@ export default class SpecReporter extends WDIOReporter {
      * @param  {string} state Test state
      * @return {String}       State color
      */
-    getColor (state?: string): ChalkColors {
+    getColor (state?: string) {
         // In case of an unknown state
-        let color = ChalkColors.GRAY
+        let color: keyof typeof chalk = 'gray'
 
         switch (state) {
-        case State.PASSED:
-            color = ChalkColors.GREEN
+        case 'passed':
+            color = 'green'
             break
-        case State.PENDING:
-        case State.SKIPPED:
-            color = ChalkColors.CYAN
+        case 'pending':
+        case 'skipped':
+            color = 'cyan'
             break
-        case State.FAILED:
-            color = ChalkColors.RED
+        case 'failed':
+            color = 'red'
             break
         }
 
@@ -587,12 +579,11 @@ export default class SpecReporter extends WDIOReporter {
 
     /**
      * Get information about the enviroment
-     * @param capability
+     * @param  {Object}  caps    Enviroment details
      * @param  {Boolean} verbose
-     * @param isMultiremote
      * @return {String}          Enviroment string
      */
-    getEnviromentCombo (capability: Capabilities.RemoteCapability, verbose = true, isMultiremote = false): string {
+    getEnviromentCombo (capability: Capabilities.RemoteCapability, verbose = true, isMultiremote = false) {
         if (isMultiremote) {
             const browserNames = Object.values(capability).map((c) => c.browserName)
             const browserName = browserNames.length > 1

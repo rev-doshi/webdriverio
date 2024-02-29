@@ -6,8 +6,7 @@ import { startWebDriver } from './startWebDriver.js'
 import { initializeWorkerService, initializeLauncherService } from './initializeServices.js'
 import {
     commandCallStructure, isValidParameter, getArgumentType, safeImport,
-    isFunctionAsync, transformCommandLogResult, sleep, isAppiumCapability,
-    userImport
+    isFunctionAsync, transformCommandLogResult, sleep, isAppiumCapability
 } from './utils.js'
 import { wrapCommand, executeHooksWithArgs, executeAsync } from './shim.js'
 import * as asyncIterators from './pIteration.js'
@@ -32,7 +31,6 @@ export {
     safeImport,
     sleep,
     isAppiumCapability,
-    userImport,
     asyncIterators,
 
     /**

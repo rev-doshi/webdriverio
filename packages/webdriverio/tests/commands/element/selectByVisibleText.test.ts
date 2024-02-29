@@ -2,10 +2,12 @@ import path from 'node:path'
 import { ELEMENT_KEY } from 'webdriver'
 import { expect, describe, it, vi, beforeEach, afterEach } from 'vitest'
 
+// @ts-ignore mocked (original defined in webdriver package)
+import got from 'got'
 import { remote } from '../../../src/index.js'
 import * as utils from '../../../src/utils/index.js'
 
-vi.mock('fetch')
+vi.mock('got')
 vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdio/logger')))
 
 describe('selectByVisibleText test', () => {
@@ -24,7 +26,7 @@ describe('selectByVisibleText test', () => {
     })
 
     afterEach(() => {
-        vi.mocked(fetch).mockClear()
+        vi.mocked(got).mockClear()
         getElementFromResponseSpy.mockClear()
     })
 
@@ -32,17 +34,14 @@ describe('selectByVisibleText test', () => {
         await elem.selectByVisibleText(' someValue1 ')
         const optionSelection = './option[. = "someValue1"]|./option[normalize-space(text()) = "someValue1"]'
         const optgroupSelection = './optgroup/option[. = "someValue1"]|./optgroup/option[normalize-space(text()) = "someValue1"]'
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[1][0]!.pathname)
+
+        expect(vi.mocked(got).mock.calls[1][0]!.pathname)
             .toBe('/session/foobar-123/element')
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[2][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[2][0]!.pathname)
             .toBe('/session/foobar-123/element/some-elem-123/element')
-        expect(JSON.parse(vi.mocked(fetch).mock.calls[2][1]!.body as any).value).toBe(
-            `${optionSelection}|${optgroupSelection}`
-        )
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[3][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[2][1]!.json.value)
+            .toBe(`${optionSelection}|${optgroupSelection}`)
+        expect(vi.mocked(got).mock.calls[3][0]!.pathname)
             .toBe('/session/foobar-123/element/some-sub-elem-321/click')
         expect(getElementFromResponseSpy).toBeCalledWith({
             [ELEMENT_KEY]: 'some-sub-elem-321'
@@ -53,16 +52,14 @@ describe('selectByVisibleText test', () => {
         await elem.selectByVisibleText('some Value1')
         const optionSelection = './option[. = "some Value1"]|./option[normalize-space(text()) = "some Value1"]'
         const optgroupSelection = './optgroup/option[. = "some Value1"]|./optgroup/option[normalize-space(text()) = "some Value1"]'
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[1][0]!.pathname)
+
+        expect(vi.mocked(got).mock.calls[1][0]!.pathname)
             .toBe('/session/foobar-123/element')
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[2][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[2][0]!.pathname)
             .toBe('/session/foobar-123/element/some-elem-123/element')
-        expect(JSON.parse(vi.mocked(fetch).mock.calls[2][1]!.body as any).value)
+        expect(vi.mocked(got).mock.calls[2][1]!.json.value)
             .toBe(`${optionSelection}|${optgroupSelection}`)
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[3][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[3][0]!.pathname)
             .toBe('/session/foobar-123/element/some-sub-elem-321/click')
         expect(getElementFromResponseSpy).toBeCalledWith({
             [ELEMENT_KEY]: 'some-sub-elem-321'
@@ -73,16 +70,14 @@ describe('selectByVisibleText test', () => {
         await elem.selectByVisibleText(' someValue1 ')
         const optionSelection = './option[. = "someValue1"]|./option[normalize-space(text()) = "someValue1"]'
         const optgroupSelection = './optgroup/option[. = "someValue1"]|./optgroup/option[normalize-space(text()) = "someValue1"]'
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[1][0]!.pathname)
+
+        expect(vi.mocked(got).mock.calls[1][0]!.pathname)
             .toBe('/session/foobar-123/element')
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[2][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[2][0]!.pathname)
             .toBe('/session/foobar-123/element/some-elem-123/element')
-        expect(JSON.parse(vi.mocked(fetch).mock.calls[2][1]!.body as any).value)
+        expect(vi.mocked(got).mock.calls[2][1]!.json.value)
             .toBe(`${optionSelection}|${optgroupSelection}`)
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[3][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[3][0]!.pathname)
             .toBe('/session/foobar-123/element/some-sub-elem-321/click')
         expect(getElementFromResponseSpy).toBeCalledWith({
             [ELEMENT_KEY]: 'some-sub-elem-321'
@@ -93,16 +88,14 @@ describe('selectByVisibleText test', () => {
         await elem.selectByVisibleText('some    Value1')
         const optionSelection = './option[. = "some Value1"]|./option[normalize-space(text()) = "some Value1"]'
         const optgroupSelection = './optgroup/option[. = "some Value1"]|./optgroup/option[normalize-space(text()) = "some Value1"]'
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[1][0]!.pathname)
+
+        expect(vi.mocked(got).mock.calls[1][0]!.pathname)
             .toBe('/session/foobar-123/element')
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[2][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[2][0]!.pathname)
             .toBe('/session/foobar-123/element/some-elem-123/element')
-        expect(JSON.parse(vi.mocked(fetch).mock.calls[2][1]!.body as any).value)
+        expect(vi.mocked(got).mock.calls[2][1]!.json.value)
             .toBe(`${optionSelection}|${optgroupSelection}`)
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[3][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[3][0]!.pathname)
             .toBe('/session/foobar-123/element/some-sub-elem-321/click')
         expect(getElementFromResponseSpy).toBeCalledWith({
             [ELEMENT_KEY]: 'some-sub-elem-321'
@@ -113,16 +106,14 @@ describe('selectByVisibleText test', () => {
         await elem.selectByVisibleText('"someValue1""')
         const optionSelection = './option[. = concat("", \'"\', "someValue1", \'"\', "", \'"\', "")]|./option[normalize-space(text()) = concat("", \'"\', "someValue1", \'"\', "", \'"\', "")]'
         const optgroupSelection = './optgroup/option[. = concat("", \'"\', "someValue1", \'"\', "", \'"\', "")]|./optgroup/option[normalize-space(text()) = concat("", \'"\', "someValue1", \'"\', "", \'"\', "")]'
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[1][0]!.pathname)
+
+        expect(vi.mocked(got).mock.calls[1][0]!.pathname)
             .toBe('/session/foobar-123/element')
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[2][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[2][0]!.pathname)
             .toBe('/session/foobar-123/element/some-elem-123/element')
-        expect(JSON.parse(vi.mocked(fetch).mock.calls[2][1]!.body as any).value)
+        expect(vi.mocked(got).mock.calls[2][1]!.json.value)
             .toBe(`${optionSelection}|${optgroupSelection}`)
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[3][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[3][0]!.pathname)
             .toBe('/session/foobar-123/element/some-sub-elem-321/click')
         expect(getElementFromResponseSpy).toBeCalledWith({
             [ELEMENT_KEY]: 'some-sub-elem-321'
@@ -133,16 +124,14 @@ describe('selectByVisibleText test', () => {
         await elem.selectByVisibleText(123)
         const optionSelection = './option[. = "123"]|./option[normalize-space(text()) = "123"]'
         const optgroupSelection = './optgroup/option[. = "123"]|./optgroup/option[normalize-space(text()) = "123"]'
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[1][0]!.pathname)
+
+        expect(vi.mocked(got).mock.calls[1][0]!.pathname)
             .toBe('/session/foobar-123/element')
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[2][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[2][0]!.pathname)
             .toBe('/session/foobar-123/element/some-elem-123/element')
-        expect(JSON.parse(vi.mocked(fetch).mock.calls[2][1]!.body as any).value)
+        expect(vi.mocked(got).mock.calls[2][1]!.json.value)
             .toBe(`${optionSelection}|${optgroupSelection}`)
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[3][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[3][0]!.pathname)
             .toBe('/session/foobar-123/element/some-sub-elem-321/click')
         expect(getElementFromResponseSpy).toBeCalledWith({
             [ELEMENT_KEY]: 'some-sub-elem-321'

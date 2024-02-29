@@ -15,7 +15,7 @@ export const DEFAULTS: Options.Definition<Required<Options.WebDriver>> = {
      */
     hostname: {
         type: 'string',
-        default: 'localhost'
+        default: '0.0.0.0'
     },
     /**
      * port of automation driver
@@ -93,6 +93,12 @@ export const DEFAULTS: Options.Definition<Required<Options.WebDriver>> = {
     /**
      * Override default agent
      */
+    agent: {
+        type: 'object'
+    },
+    /**
+     * Override default agent
+     */
     logLevels: {
         type: 'object'
     },
@@ -107,7 +113,7 @@ export const DEFAULTS: Options.Definition<Required<Options.WebDriver>> = {
      */
     transformRequest: {
         type: 'function',
-        default: (requestOptions: RequestInit) => requestOptions
+        default: (requestOptions: Options.RequestLibOptions) => requestOptions
     },
     /**
      * Function transforming the response object after it is received

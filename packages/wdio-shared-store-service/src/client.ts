@@ -1,14 +1,13 @@
+import type { RequestError } from 'got'
+import got from 'got'
+
 import type { JsonCompatible, JsonPrimitive, JsonObject, JsonArray } from '@wdio/types'
 import type { GetValueOptions } from './types.js'
 
-let baseUrlResolve: (value: string) => void
+let baseUrlResolve: Parameters<ConstructorParameters<typeof Promise>[0]>[0]
 const baseUrlPromise = new Promise<string>((resolve) => {
     baseUrlResolve = resolve
 })
-
-const headers = {
-    'Content-Type': 'application/json'
-}
 
 let isBaseUrlReady = false
 export const setPort = (port: number) => {
@@ -31,12 +30,8 @@ export const getValue = async (key: string): Promise<string | number | boolean |
         throw new Error('Attempting to use `getValue` before the server has been initialized.')
     }
     const baseUrl = await baseUrlPromise
-    const res = await fetch(`${baseUrl}/${key}`, {
-        method: 'get',
-        headers
-    }).catch(errHandler)
-    const responseBody = await res.json()
-    return responseBody.value ?? undefined
+    const res = await got.get(`${baseUrl}/${key}`, { responseType: 'json' }).catch(errHandler)
+    return res?.body ? (res.body as JsonObject).value : undefined
 }
 
 /**
@@ -46,14 +41,10 @@ export const getValue = async (key: string): Promise<string | number | boolean |
  */
 export const setValue = async (key: string, value: JsonCompatible | JsonPrimitive) => {
     const setPromise = baseUrlPromise.then((baseUrl) => {
-        return fetch(`${baseUrl}/`, {
-            method: 'post',
-            body: JSON.stringify({ key, value }),
-            headers
-        }).catch(errHandler)
+        return got.post(`${baseUrl}/`, { json: { key, value } }).catch(errHandler)
     })
 
-    return isBaseUrlReady ? (await setPromise).status : Promise.resolve()
+    return isBaseUrlReady ? setPromise : Promise.resolve()
 }
 
 /**
@@ -63,14 +54,10 @@ export const setValue = async (key: string, value: JsonCompatible | JsonPrimitiv
  */
 export const setResourcePool = async (key: string, value: JsonArray) => {
     const setPromise = baseUrlPromise.then((baseUrl) => {
-        return fetch(`${baseUrl}/pool`, {
-            method: 'post',
-            body: JSON.stringify({ key, value }),
-            headers
-        }).catch(errHandler)
+        return got.post(`${baseUrl}/pool`, { json: { key, value } }).catch(errHandler)
     })
 
-    return isBaseUrlReady ? (await setPromise).status : Promise.resolve()
+    return isBaseUrlReady ? setPromise : Promise.resolve()
 }
 
 /**
@@ -83,12 +70,8 @@ export const getValueFromPool = async (key: string, options?: GetValueOptions) =
         throw new Error('Attempting to use `getValueFromPool` before the server has been initialized.')
     }
     const baseUrl = await baseUrlPromise
-    const res = await fetch(`${baseUrl}/pool/${key}${typeof options?.timeout === 'number' ? `?timeout=${options.timeout}` : '' }`, {
-        method: 'get',
-        headers
-    }).catch(errHandler)
-    const responseBody = await res.json()
-    return responseBody.value ?? undefined
+    const res = await got.get(`${baseUrl}/pool/${key}${typeof options?.timeout === 'number' ? `?timeout=${options.timeout}` : '' }`, { responseType: 'json' }).catch(errHandler)
+    return res?.body ? (res.body as JsonObject).value : undefined
 }
 
 /**
@@ -101,14 +84,10 @@ export const addValueToPool = async (key: string, value: JsonPrimitive | JsonCom
         throw new Error('Attempting to use `addValueToPool` before the server has been initialized.')
     }
     const baseUrl = await baseUrlPromise
-    const res = await fetch(`${baseUrl}/pool/${key}`, {
-        method: 'post',
-        body: JSON.stringify({ value }),
-        headers
-    }).catch(errHandler)
-    return res.status
+    const res = await got.post(`${baseUrl}/pool/${key}`, { json: { value }, responseType: 'json' }).catch(errHandler)
+    return res?.body ? (res.body as JsonObject).value : undefined
 }
 
-const errHandler= async (err: Error) => {
-    throw new Error(`${err.message || 'Shared store server threw an error'}`)
+const errHandler = (err: RequestError) => {
+    throw new Error(`${err.response?.body || 'Shared store server threw an error'}`)
 }

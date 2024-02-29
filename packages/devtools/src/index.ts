@@ -120,12 +120,9 @@ export default class DevTools {
      * @param   {object} instance  the object we get from a new browser session.
      * @returns {string}           the new session id of the browser
      */
-    static async reloadSession (instance: Client, newCapabilities: WebdriverIO.Capabilities): Promise<string> {
+    static async reloadSession (instance: any): Promise<string> {
         const { session } = sessionMap.get(instance.sessionId)
-        const browser = await launch({
-            ...instance.requestedCapabilities as WebdriverIO.Capabilities,
-            ...(newCapabilities || {})
-        })
+        const browser = await launch(instance.requestedCapabilities)
         const pages = await browser.pages()
         session.initBrowser.call(session, browser, pages)
         instance.puppeteer = browser

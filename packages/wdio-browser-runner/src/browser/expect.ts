@@ -1,5 +1,6 @@
 import { expect, type MatcherContext, type ExpectationResult, type SyncExpectationResult } from 'expect'
 import { MESSAGE_TYPES, type Workers } from '@wdio/types'
+import { matchers } from 'virtual:wdio'
 import { $ } from '@wdio/globals'
 import type { ChainablePromiseElement } from 'webdriverio'
 
@@ -25,13 +26,14 @@ const matcherRequests = new Map<number, MatcherPayload>()
 const COMMAND_TIMEOUT = 30 * 1000 // 30s
 
 /**
- * Matcher factory enables to run all matchers within the browser by sending all necessary information
- * to the worker process and execute the actual assertion in the Node.js environment.
- * @param matcherName name of the matcher
- * @returns a matcher result computed in the Node.js environment
+ * Set up expect-webdriverio matchers for the browser environment.
+ * Every assertion is send to the testrunner via a websocket connection
+ * and is executed in the Node.js environment. This allows us to enable
+ * matchers that require Node.js specific modules like `fs` or `child_process`,
+ * for visual regression or snapshot testing for example.
  */
-function createMatcher (matcherName: string) {
-    return async function (this: MatcherContext, context: WebdriverIO.Browser | WebdriverIO.Element | ChainablePromiseElement<WebdriverIO.Element> | ChainablePromiseArray, ...args: any[]) {
+expect.extend(matchers.reduce((acc, matcherName) => {
+    acc[matcherName] = async function (context: WebdriverIO.Browser | WebdriverIO.Element | ChainablePromiseElement<WebdriverIO.Element> | ChainablePromiseArray, ...args: any[]) {
         const cid = getCID()
         if (!import.meta.hot || !cid) {
             return {
@@ -56,28 +58,26 @@ function createMatcher (matcherName: string) {
             args: args
         }
 
-        const isContextObject = typeof context === 'object'
-
         /**
          * Check if context is an WebdriverIO.Element
          */
-        if (isContextObject && 'selector' in context && 'selector' in context) {
+        if ('elementId' in context && typeof context.elementId === 'string') {
             expectRequest.element = context
         }
 
         /**
          * Check if context is ChainablePromiseElement
          */
-        if (isContextObject && 'then' in context && typeof (context as any).selector === 'object') {
+        if ('then' in context && typeof (context as any).selector === 'object') {
             expectRequest.element = await context
         }
 
         /**
-         * Check if context is a `Element` and transform it into a WebdriverIO.Element
+         * Check if context is a `Element` and transtform it into a WebdriverIO.Element
          */
         if (context instanceof Element) {
             expectRequest.element = await $(context as any as HTMLElement)
-        } else if (isContextObject && !('sessionId' in context)) {
+        } else if (typeof context === 'object' && !('sessionId' in context)) {
             /**
              * check if context is an object or promise and resolve it
              * but not pass through the browser object
@@ -86,11 +86,6 @@ function createMatcher (matcherName: string) {
             if ('then' in context) {
                 expectRequest.context = await context
             }
-        } else if (!isContextObject) {
-            /**
-             * if context is not an object or promise, pass it through
-             */
-            expectRequest.context = context
         }
 
         /**
@@ -124,11 +119,7 @@ function createMatcher (matcherName: string) {
         }
 
         import.meta.hot.send(WDIO_EVENT_NAME, { type: MESSAGE_TYPES.expectRequestMessage, value: expectRequest })
-        const contextString = isContextObject
-            ? 'elementId' in context
-                ? 'WebdriverIO.Element'
-                : 'WebdriverIO.Browser'
-            : context
+        const contextString = 'elementId' in context ? 'WebdriverIO.Element' : 'WebdriverIO.Browser'
 
         return new Promise<SyncExpectationResult>((resolve, reject) => {
             const commandTimeout = setTimeout(
@@ -139,39 +130,16 @@ function createMatcher (matcherName: string) {
             matcherRequests.set(expectRequest.id, { resolve, commandTimeout })
         })
     }
-}
-
-/**
- * request all available matchers from the testrunner
- */
-import.meta.hot?.send(WDIO_EVENT_NAME, { type: MESSAGE_TYPES.expectMatchersRequest })
+    return acc
+}, {} as Record<string, RawMatcherFn<MatcherContext>>))
 
 /**
  * listen on assertion results from testrunner
  */
 import.meta.hot?.on(WDIO_EVENT_NAME, (message: Workers.SocketMessage) => {
-    /**
-     * Set up `expect-webdriverio` matchers for the browser environment.
-     * Every assertion is send to the testrunner via a websocket connection
-     * and is executed in the Node.js environment. This allows us to enable
-     * matchers that require Node.js specific modules like `fs` or `child_process`,
-     * for visual regression or snapshot testing for example.
-     *
-     * The testrunner will send a list of available matchers to the browser
-     * since there might services or other hooks that add custom matchers.
-     */
-    if (message.type === MESSAGE_TYPES.expectMatchersResponse) {
-        const matchers = message.value.matchers.reduce((acc, matcherName) => {
-            acc[matcherName] = createMatcher(matcherName)
-            return acc
-        }, {} as Record<string, RawMatcherFn<MatcherContext>>)
-        expect.extend(matchers)
-    }
-
     if (message.type !== MESSAGE_TYPES.expectResponseMessage) {
         return
     }
-
     const payload = matcherRequests.get(message.value.id)
     if (!payload) {
         return console.warn(`Couldn't find payload for assertion result with id ${message.value.id}`)

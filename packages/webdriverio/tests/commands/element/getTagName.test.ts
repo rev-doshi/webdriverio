@@ -1,9 +1,11 @@
 import path from 'node:path'
 import { expect, describe, it, afterEach, beforeAll, vi } from 'vitest'
 
+// @ts-ignore mocked (original defined in webdriver package)
+import got from 'got'
 import { remote } from '../../../src/index.js'
 
-vi.mock('fetch')
+vi.mock('got')
 vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdio/logger')))
 
 describe('getTagName test', () => {
@@ -22,12 +24,11 @@ describe('getTagName test', () => {
 
     it('should allow to get the tag name of an element', async () => {
         await elem.getTagName()
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[2][0]!.pathname)
+        expect(vi.mocked(got).mock.calls[2][0]!.pathname)
             .toBe('/session/foobar-123/element/some-elem-123/name')
     })
 
     afterEach(() => {
-        vi.mocked(fetch).mockClear()
+        vi.mocked(got).mockClear()
     })
 })

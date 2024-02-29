@@ -2,7 +2,7 @@ import React from 'react'
 import BrowserOnly from '@docusaurus/BrowserOnly'
 import { useColorMode } from '@docusaurus/theme-common'
 
-export function ImageSwitcher ({ lightImageSrc, darkImageSrc, alt, link, ...args }) {
+export function ImageSwitcher ({ lightImageSrc, darkImageSrc, alt, link }) {
     return <BrowserOnly>
         {() => {
             const { isDarkTheme } = useColorMode()
@@ -10,13 +10,13 @@ export function ImageSwitcher ({ lightImageSrc, darkImageSrc, alt, link, ...args
             if (link) {
                 return (
                     <a href={link}>
-                        <img src={isDarkTheme ? darkImageSrc : lightImageSrc} alt={alt} {...args} />
+                        <img src={isDarkTheme ? darkImageSrc : lightImageSrc} alt={alt} />
                     </a>
                 )
             }
 
             return (
-                <img src={isDarkTheme ? darkImageSrc : lightImageSrc} alt={alt} {...args} />
+                <img src={isDarkTheme ? darkImageSrc : lightImageSrc} alt={alt} />
             )
         }}
     </BrowserOnly>

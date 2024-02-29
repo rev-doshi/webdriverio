@@ -1,4 +1,5 @@
 import path from 'node:path'
+import got from 'got'
 import { describe, expect, it, vi, beforeEach, beforeAll } from 'vitest'
 
 import { executeHooksWithArgs, testFnWrapper } from '@wdio/utils'
@@ -135,7 +136,7 @@ describe('CucumberAdapter', () => {
     it('can run without errors', async () => {
         const adapter = await CucumberAdapter.init!('0-0', {
             cucumberOpts: { format: [] }
-        }, ['/foo/bar'], {}, {}, {}, false, 'progress')
+        }, ['/foo/bar'], {}, {}, {}, false, ['progress'])
         adapter.registerRequiredModules = vi.fn()
         adapter.addWdioHooks = vi.fn()
         adapter.loadFiles = vi.fn()
@@ -217,7 +218,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             false,
-            'progress'
+            ['progress']
         )
         adapter.addWdioHooks(
             {
@@ -325,7 +326,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             false,
-            'progress'
+            ['progress']
         )
 
         expect(adapter._specs).toHaveLength(1)
@@ -353,7 +354,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             false,
-            'progress'
+            ['progress']
         )
 
         expect(adapter._specs).toHaveLength(1)
@@ -381,7 +382,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             false,
-            'progress'
+            ['progress']
         )
 
         expect(adapter._specs).toHaveLength(1)
@@ -409,7 +410,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             false,
-            'progress'
+            ['progress']
         )
 
         expect(adapter._specs).toHaveLength(1)
@@ -437,7 +438,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             false,
-            'progress'
+            ['progress']
         )
 
         expect(adapter._specs).toHaveLength(0)
@@ -465,7 +466,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             false,
-            'progress'
+            ['progress']
         )
 
         expect(adapter._specs).toHaveLength(1)
@@ -493,7 +494,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             false,
-            'progress'
+            ['progress']
         )
 
         expect(adapter._specs).toHaveLength(1)
@@ -520,7 +521,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             false,
-            'progress'
+            ['progress']
         )
 
         expect(adapter.gherkinParser.tokenMatcher.dialect.name).toBe('Danish')
@@ -538,7 +539,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             false,
-            'progress'
+            ['progress']
         )
 
         expect(adapter._specs).toHaveLength(2)
@@ -566,7 +567,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             false,
-            'progress'
+            ['progress']
         )
 
         expect(adapter._specs).toHaveLength(1)
@@ -593,7 +594,7 @@ describe('CucumberAdapter', () => {
             {},
             {},
             true,
-            'progress'
+            ['progress']
         )
 
         expect(adapter._specs).toHaveLength(0)
@@ -665,38 +666,34 @@ describe('publishCucumberReport', () => {
             readdir: vi.fn().mockResolvedValue(['file1.ndjson', 'file2.ndjson']),
             readFile: vi.fn().mockResolvedValueOnce('{"message": "Test 1"}').mockResolvedValueOnce('{"message": "Test 2"}')
         }))
-        vi.spyOn(global, 'fetch').mockImplementation((url: string | URL | globalThis.Request) => {
-            if (/\/api\/reports/.test(url as string)) {
-                return Promise.resolve(Response.json({}, {
-                    headers: {
-                        location: 'https://example.com/reports/12345'
-                    }
-                }))
-            }
-            return Promise.resolve(Response.json({}))
-        })
+        vi.mock('got')
     })
 
     it('should not publish report if CUCUMBER_PUBLISH_REPORT_TOKEN is not set', async () => {
         await publishCucumberReport('/some/directory')
-        expect(fetch).not.toHaveBeenCalled()
+        expect(got).not.toHaveBeenCalled()
     })
 
     it('should publish report successfully', async () => {
         process.env.CUCUMBER_PUBLISH_REPORT_TOKEN = 'some-token'
         process.env.CUCUMBER_PUBLISH_REPORT_URL = 'https://example.com/api/reports'
 
+        // @ts-expect-error mock feature
+        got.customResponseFor(/\/api\/reports/, {
+            headers: {
+                location: 'https://example.com/reports/12345'
+            }
+        })
+
         await publishCucumberReport('./')
 
-        expect(fetch).toHaveBeenCalledWith('https://example.com/api/reports', {
-            method: 'get',
+        expect(got).toHaveBeenCalledWith('https://example.com/api/reports', {
             headers: {
                 Authorization: 'Bearer some-token'
             }
         })
 
-        expect(fetch).toHaveBeenCalledWith('https://example.com/reports/12345', {
-            method: 'put',
+        expect(got.put).toHaveBeenCalledWith('https://example.com/reports/12345', {
             headers: {
                 'Content-Type': 'application/json'
             },

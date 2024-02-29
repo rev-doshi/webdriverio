@@ -37,7 +37,7 @@ export interface Questionnair {
     serenityLibPath?: string
     plugins: string[]
     outputDir?: string
-    includeVisualTesting: boolean
+    baseUrl: string
     npmInstall: boolean
     createPackageJSON?: boolean
     projectRootCorrect?: boolean

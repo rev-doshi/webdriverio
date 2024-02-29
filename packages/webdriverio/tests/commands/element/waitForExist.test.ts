@@ -1,9 +1,11 @@
 import path from 'node:path'
 import { expect, describe, it, vi, beforeEach } from 'vitest'
 
+// @ts-ignore mocked (original defined in webdriver package)
+import got from 'got'
 import { remote } from '../../../src/index.js'
 
-vi.mock('fetch')
+vi.mock('got')
 vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdio/logger')))
 
 describe('waitForExists', () => {
@@ -11,7 +13,7 @@ describe('waitForExists', () => {
     let browser: WebdriverIO.Browser
 
     beforeEach(async () => {
-        vi.mocked(fetch).mockClear()
+        vi.mocked(got).mockClear()
 
         browser = await remote({
             baseUrl: 'http://foobar.com',

@@ -1,9 +1,11 @@
 import path from 'node:path'
 import { expect, describe, it, afterEach, vi } from 'vitest'
 
+// @ts-ignore mocked (original defined in webdriver package)
+import got from 'got'
 import { remote } from '../../../src/index.js'
 
-vi.mock('fetch')
+vi.mock('got')
 vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdio/logger')))
 
 describe('getHTML test', () => {
@@ -22,8 +24,7 @@ describe('getHTML test', () => {
         }
 
         let result = await elem.getHTML()
-        // @ts-expect-error mock implementation
-        expect(vi.mocked(fetch).mock.calls[2][0].pathname)
+        expect(vi.mocked(got).mock.calls[2][0].pathname)
             .toBe('/session/foobar-123/execute/sync')
         expect(result).toBe('<some>outer html</some>')
 
@@ -32,6 +33,6 @@ describe('getHTML test', () => {
     })
 
     afterEach(() => {
-        vi.mocked(fetch).mockClear()
+        vi.mocked(got).mockClear()
     })
 })

@@ -111,7 +111,7 @@ Options: *http* | *https*
 Host of your WebDriver server.
 
 Type: `String`<br />
-Default: *localhost*
+Default: *0.0.0.0*
 
 ### port
 Port your WebDriver server is on.

@@ -166,7 +166,6 @@ class _AccessibilityHandler {
     }
 
     async afterTest (suiteTitle: string | undefined, test: Frameworks.Test) {
-        BStackLogger.debug('Accessibility after test hook. Before sending test stop event')
         if (
             this._framework !== 'mocha' ||
             !this.shouldRunTestHooks(this._browser, this._accessibility)
@@ -220,7 +219,7 @@ class _AccessibilityHandler {
         const gherkinDocument = world.gherkinDocument
         const featureData = gherkinDocument.feature
         const uniqueId = getUniqueIdentifierForCucumber(world)
-        const shouldScanScenario = shouldScanTestForAccessibility(featureData?.name, pickleData.name, this._accessibilityOptions, world, true)
+        const shouldScanScenario = shouldScanTestForAccessibility(featureData?.name, pickleData.name, this._accessibilityOptions)
         const isPageOpened = await this.checkIfPageOpened(this._browser, uniqueId, shouldScanScenario)
 
         if (this._sessionId) {
@@ -244,7 +243,6 @@ class _AccessibilityHandler {
     }
 
     async afterScenario (world: ITestCaseHookParameter) {
-        BStackLogger.debug('Accessibility after scenario hook. Before sending test stop event')
         if (!this.shouldRunTestHooks(this._browser, this._accessibility)) {
             return
         }

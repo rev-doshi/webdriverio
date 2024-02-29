@@ -195,9 +195,10 @@ If you use external libraries (e.g., to do database calls) that support promises
 When returning the promise, WebdriverIO ensures that it doesn't continue with the next command until the promise is resolved. If the promise gets rejected, the command will throw an error.
 
 ```js
+import got from 'got'
+
 browser.addCommand('makeRequest', async (url) => {
-    const response = await fetch(url)
-    return await response.json()
+    return got(url).json()
 })
 ```
 

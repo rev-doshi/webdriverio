@@ -85,8 +85,9 @@ In your `tsconfig.json` make sure to add `wdio-vscode-service` to your list of t
             "expect-webdriverio",
             "wdio-vscode-service"
         ],
-        "target": "es2020",
-        "moduleResolution": "node16"
+        "target": "es2019",
+        "moduleResolution": "node",
+        "esModuleInterop": true
     }
 }
 ```

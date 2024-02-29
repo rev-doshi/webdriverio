@@ -6,6 +6,7 @@ import { createRequire } from 'node:module'
 import { EventEmitter } from 'node:events'
 import { Writable } from 'node:stream'
 
+import got from 'got'
 import isGlob from 'is-glob'
 import { sync as globSync } from 'glob'
 
@@ -35,13 +36,13 @@ import {
 
     DataTable,
     World,
-    Status,
+    Status
 } from '@cucumber/cucumber'
 import Gherkin from '@cucumber/gherkin'
 import { IdGenerator } from '@cucumber/messages'
 import type { Feature, GherkinDocument } from '@cucumber/messages'
 import type Cucumber from '@cucumber/cucumber'
-import type { IConfiguration, IRunEnvironment } from '@cucumber/cucumber/api'
+import type { IRunEnvironment } from '@cucumber/cucumber/api'
 import { loadConfiguration, loadSources, runCucumber } from '@cucumber/cucumber/api'
 
 import { DEFAULT_OPTS } from './constants.js'
@@ -268,7 +269,7 @@ class CucumberAdapter {
             }
 
             const { runConfiguration } = await loadConfiguration(
-                { profiles: this._cucumberOpts.profiles, provided: this._cucumberOpts as Partial<IConfiguration> },
+                { profiles: this._cucumberOpts.profiles, provided: this._cucumberOpts },
                 environment
             )
 
@@ -543,14 +544,13 @@ const publishCucumberReport = async (cucumberMessageDir: string): Promise<void> 
         return
     }
 
-    const response = await fetch(url, {
-        method: 'get',
+    const { headers } = await got(url, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
     })
 
-    const location = response.headers.get('location')
+    const { location } = headers
 
     const files = (await readdir(path.normalize(cucumberMessageDir))).filter((file) => path.extname(file) === '.ndjson')
 
@@ -565,8 +565,7 @@ const publishCucumberReport = async (cucumberMessageDir: string): Promise<void> 
         )
     ).join('')
 
-    await fetch(location as string, {
-        method: 'put',
+    await got.put(location as string, {
         headers: {
             'Content-Type': 'application/json'
         },

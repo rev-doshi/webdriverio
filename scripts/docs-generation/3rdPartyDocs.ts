@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import url from 'node:url'
 import path from 'node:path'
+import urljoin from 'url-join'
 
 import { downloadFromGitHub } from '../utils/index.js'
 import { buildPreface } from '../utils/helpers.js'
@@ -155,7 +156,7 @@ function normalizeDoc(readme: string, githubUrl: string, branch: string, preface
             const stringInParentheses = urlMatcher[2]
             const url = ( stringInParentheses.startsWith('http') || stringInParentheses.startsWith('#') )
                 ? stringInParentheses
-                : `${githubUrl}/blob/${branch}/${stringInParentheses}`
+                : urljoin(githubUrl, 'blob', branch, stringInParentheses)
             readmeArr[idx] = readmeArr[idx].replace(`](${stringInParentheses})`, `](${url})`)
         }
     })

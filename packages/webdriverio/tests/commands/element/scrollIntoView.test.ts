@@ -1,9 +1,11 @@
 import path from 'node:path'
 import { expect, describe, it, vi, beforeAll, beforeEach } from 'vitest'
 
+// @ts-ignore mocked (original defined in webdriver package)
+import got from 'got'
 import { remote } from '../../../src/index.js'
 
-vi.mock('fetch')
+vi.mock('got')
 vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdio/logger')))
 
 describe('scrollIntoView test', () => {
@@ -11,7 +13,7 @@ describe('scrollIntoView test', () => {
     let elem: WebdriverIO.Element
 
     beforeEach(() => {
-        vi.mocked(fetch).mockClear()
+        vi.mocked(got).mockClear()
     })
 
     describe('desktop', () => {
@@ -34,34 +36,33 @@ describe('scrollIntoView test', () => {
 
         it('scrolls by default the element to the top', async () => {
             await elem.scrollIntoView()
-            const optionsVoid = vi.mocked(fetch).mock.calls.slice(-2, -1)[0][1] as any
-            expect(JSON.parse(optionsVoid.body)).toMatchSnapshot()
+            const optionsVoid = vi.mocked(got).mock.calls.slice(-2, -1)[0][1] as any
+            expect(optionsVoid.json).toMatchSnapshot()
         })
 
         it('scrolls element when using boolean scroll options', async () => {
             await elem.scrollIntoView(true)
-            const optionsTrue = vi.mocked(fetch).mock.calls.slice(-2, -1)[0][1] as any
-            expect(JSON.parse(optionsTrue.body)).toMatchSnapshot()
-            vi.mocked(fetch).mockClear()
+            const optionsTrue = vi.mocked(got).mock.calls.slice(-2, -1)[0][1] as any
+            expect(optionsTrue.json).toMatchSnapshot()
+            vi.mocked(got).mockClear()
             await elem.scrollIntoView(false)
-            const optionsFalse = vi.mocked(fetch).mock.calls.slice(-2, -1)[0][1] as any
-            expect(JSON.parse(optionsFalse.body)).toMatchSnapshot()
+            const optionsFalse = vi.mocked(got).mock.calls.slice(-2, -1)[0][1] as any
+            expect(optionsFalse.json).toMatchSnapshot()
         })
 
         it('scrolls element using scroll into view options', async () => {
             await elem.scrollIntoView({ block: 'center', inline: 'center' })
-            const optionsCenter = vi.mocked(fetch).mock.calls.slice(-2, -1)[0][1] as any
-            expect(JSON.parse(optionsCenter.body)).toMatchSnapshot()
+            const optionsCenter = vi.mocked(got).mock.calls.slice(-2, -1)[0][1] as any
+            expect(optionsCenter.json).toMatchSnapshot()
         })
 
         it('falls back using Web API if scroll action fails', async () => {
             // @ts-expect-error mock feature
-            vi.mocked(fetch).customResponseFor(/\/actions/, { error: 'invalid parameter' })
+            got.customResponseFor(/\/actions/, { error: 'invalid parameter' })
             // @ts-expect-error mock feature
-            elem.elementId = { scrollIntoView: 'mockFunction' }
+            elem.elementId = { scrollIntoView: vi.fn() }
             await elem.scrollIntoView({})
-            // @ts-expect-error mock implementation
-            expect(vi.mocked(fetch).mock.calls.pop()![0]!.href.endsWith('/execute/sync'))
+            expect(vi.mocked(got).mock.calls.pop()![0]!.href.endsWith('/execute/sync'))
                 .toBe(true)
         })
 
@@ -70,10 +71,10 @@ describe('scrollIntoView test', () => {
             vi.spyOn(browser, 'getElementRect').mockResolvedValue(
                 ({ x: 15.34, y: 20.23, height: 30.2344, width: 50.543 }))
             await elem.scrollIntoView({ block: 'center', inline: 'center' })
-            const optionsCenter = vi.mocked(fetch).mock.calls.slice(-2, -1)[0][1] as any
-            expect(JSON.parse(optionsCenter.body).actions[0].actions[0].deltaX).toBe(0)
-            expect(JSON.parse(optionsCenter.body).actions[0].actions[0].deltaY).toBe(0)
-            expect(JSON.parse(optionsCenter.body).actions[0].actions[0].y).toBe(-385)
+            const optionsCenter = vi.mocked(got).mock.calls.slice(-2, -1)[0][1] as any
+            expect(optionsCenter.json.actions[0].actions[0].deltaX).toBe(0)
+            expect(optionsCenter.json.actions[0].actions[0].deltaY).toBe(0)
+            expect(optionsCenter.json.actions[0].actions[0].y).toBe(-385)
         })
 
     })
@@ -89,44 +90,50 @@ describe('scrollIntoView test', () => {
             })
             elem = await browser.$('#foo')
             // @ts-expect-error mock feature
-            elem.elementId = { scrollIntoView: 'mockFunction'  }
+            elem.elementId = { scrollIntoView: vi.fn() }
         })
 
         beforeEach(() => {
-            vi.mocked(fetch).mockClear()
+            vi.mocked(got).mockClear()
         })
 
         it('scrolls by default the element to the top', async () => {
             await elem.scrollIntoView()
-            const { calls } = vi.mocked(fetch).mock
+            const { calls } = vi.mocked(got).mock
             expect(calls).toHaveLength(1)
-            const [[executeCallUrl, executeCallOptions]] = calls as any
+            const [
+                [executeCallUrl, executeCallOptions]
+            ] = calls as any
             expect(executeCallUrl.pathname).toEqual('/session/foobar-123/execute/sync')
-            expect(JSON.parse(executeCallOptions.body).script).toEqual('return ((elem, options2) => elem.scrollIntoView(options2)).apply(null, arguments)')
-            expect(JSON.parse(executeCallOptions.body).args).toHaveLength(2)
-            expect(JSON.parse(executeCallOptions.body).args[1]).toEqual({ block: 'start', inline: 'nearest' })
+            expect(executeCallOptions.json.script).toEqual('return ((elem, options2) => elem.scrollIntoView(options2)).apply(null, arguments)')
+            expect(executeCallOptions.json.args).toHaveLength(2)
+            expect(executeCallOptions.json.args[1]).toEqual({ block: 'start', inline: 'nearest' })
         })
 
         it('scrolls element when using boolean scroll options', async () => {
             await elem.scrollIntoView(true)
-            const { calls } = vi.mocked(fetch).mock
+            const { calls } = vi.mocked(got).mock
             expect(calls).toHaveLength(1)
-            const [[executeCallUrl, executeCallOptions]] = calls as any
+            const [
+                [executeCallUrl, executeCallOptions]
+            ] = calls as any
             expect(executeCallUrl.pathname).toEqual('/session/foobar-123/execute/sync')
-            expect(JSON.parse(executeCallOptions.body).script).toEqual('return ((elem, options2) => elem.scrollIntoView(options2)).apply(null, arguments)')
-            expect(JSON.parse(executeCallOptions.body).args).toHaveLength(2)
-            expect(JSON.parse(executeCallOptions.body).args[1]).toEqual(true)
+            expect(executeCallOptions.json.script).toEqual('return ((elem, options2) => elem.scrollIntoView(options2)).apply(null, arguments)')
+            expect(executeCallOptions.json.args).toHaveLength(2)
+            expect(executeCallOptions.json.args[1]).toEqual(true)
         })
 
         it('scrolls element using scroll into view options', async () => {
             await elem.scrollIntoView({ block: 'end', inline: 'center' })
-            const { calls } = vi.mocked(fetch).mock
+            const { calls } = vi.mocked(got).mock
             expect(calls).toHaveLength(1)
-            const [[executeCallUrl, executeCallOptions]] = calls as any
+            const [
+                [executeCallUrl, executeCallOptions]
+            ] = calls as any
             expect(executeCallUrl.pathname).toEqual('/session/foobar-123/execute/sync')
-            expect(JSON.parse(executeCallOptions.body).script).toEqual('return ((elem, options2) => elem.scrollIntoView(options2)).apply(null, arguments)')
-            expect(JSON.parse(executeCallOptions.body).args).toHaveLength(2)
-            expect(JSON.parse(executeCallOptions.body).args[1]).toEqual({ block: 'end', inline: 'center' })
+            expect(executeCallOptions.json.script).toEqual('return ((elem, options2) => elem.scrollIntoView(options2)).apply(null, arguments)')
+            expect(executeCallOptions.json.args).toHaveLength(2)
+            expect(executeCallOptions.json.args[1]).toEqual({ block: 'end', inline: 'center' })
         })
     })
 })

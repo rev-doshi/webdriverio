@@ -1,12 +1,14 @@
+import url from 'node:url'
 import yauzl from 'yauzl'
 import fs from 'node:fs'
 import fsp from 'node:fs/promises'
-import { pipeline } from 'node:stream/promises'
+import got from 'got'
 
 import path from 'node:path'
 import os from 'node:os'
 import { spawn } from 'node:child_process'
 import { PercyLogger } from './PercyLogger.js'
+import type { Options } from '@wdio/types'
 
 class PercyBinary {
     #hostOS = process.platform
@@ -59,18 +61,18 @@ class PercyBinary {
         throw new Error('Error trying to download percy binary')
     }
 
-    async getBinaryPath(): Promise<string> {
+    async getBinaryPath(conf: Options.Testrunner): Promise<string> {
         const destParentDir = await this.#getAvailableDirs()
         const binaryPath = path.join(destParentDir, this.#binaryName)
         if (await this.#checkPath(binaryPath)) {
             return binaryPath
         }
-        const downloadedBinaryPath: string = await this.download(destParentDir)
+        const downloadedBinaryPath: string = await this.download(conf, destParentDir)
         const isValid = await this.validateBinary(downloadedBinaryPath)
         if (!isValid) {
             // retry once
             PercyLogger.error('Corrupt percy binary, retrying')
-            return await this.download(destParentDir)
+            return await this.download(conf, destParentDir)
         }
         return downloadedBinaryPath
     }
@@ -92,7 +94,7 @@ class PercyBinary {
         })
     }
 
-    async download(destParentDir: any): Promise<string> {
+    async download(conf: any, destParentDir: any): Promise<string> {
         if (!await this.#checkPath(destParentDir)){
             await fsp.mkdir(destParentDir)
         }
@@ -101,56 +103,62 @@ class PercyBinary {
         const binaryPath = path.join(destParentDir, binaryName)
         const downloadedFileStream = fs.createWriteStream(zipFilePath)
 
-        const response = await fetch(this.#httpPath)
-
-        await pipeline(response.body as any, downloadedFileStream)
+        const options: any = url.parse(this.#httpPath)
 
         return new Promise((resolve, reject) => {
-            yauzl.open(zipFilePath, { lazyEntries: true }, function (err, zipfile) {
-                if (err) {
-                    return reject(err)
-                }
-                zipfile.readEntry()
-                zipfile.on('entry', (entry) => {
-                    if (/\/$/.test(entry.fileName)) {
-                    // Directory file names end with '/'.
+            const stream = got.extend({ followRedirect: true }).get(this.#httpPath, { isStream: true })
+            stream.on('error', (err) => {
+                PercyLogger.error('Got Error in percy binary download response: ' + err)
+            })
+
+            stream.pipe(downloadedFileStream)
+                .on('finish', () => {
+                    yauzl.open(zipFilePath, { lazyEntries: true }, function (err, zipfile) {
+                        if (err) {
+                            return reject(err)
+                        }
                         zipfile.readEntry()
-                    } else {
-                    // file entry
-                        const writeStream = fs.createWriteStream(
-                            path.join(destParentDir, entry.fileName)
-                        )
-                        zipfile.openReadStream(entry, function (zipErr, readStream) {
-                            if (zipErr) {
-                                reject(err)
-                            }
-                            readStream.on('end', function () {
-                                writeStream.close()
+                        zipfile.on('entry', (entry) => {
+                            if (/\/$/.test(entry.fileName)) {
+                                // Directory file names end with '/'.
                                 zipfile.readEntry()
-                            })
-                            readStream.pipe(writeStream)
+                            } else {
+                                // file entry
+                                const writeStream = fs.createWriteStream(
+                                    path.join(destParentDir, entry.fileName)
+                                )
+                                zipfile.openReadStream(entry, function (zipErr, readStream) {
+                                    if (zipErr) {
+                                        reject(err)
+                                    }
+                                    readStream.on('end', function () {
+                                        writeStream.close()
+                                        zipfile.readEntry()
+                                    })
+                                    readStream.pipe(writeStream)
+                                })
+
+                                if (entry.fileName === binaryName) {
+                                    zipfile.close()
+                                }
+                            }
                         })
 
-                        if (entry.fileName === binaryName) {
-                            zipfile.close()
-                        }
-                    }
-                })
-
-                zipfile.on('error', (zipErr) => {
-                    reject(zipErr)
-                })
-
-                zipfile.once('end', () => {
-                    fs.chmod(binaryPath, '0755', function (zipErr: any) {
-                        if (zipErr) {
+                        zipfile.on('error', (zipErr) => {
                             reject(zipErr)
-                        }
-                        resolve(binaryPath)
+                        })
+
+                        zipfile.once('end', () => {
+                            fs.chmod(binaryPath, '0755', function (zipErr: any) {
+                                if (zipErr) {
+                                    reject(zipErr)
+                                }
+                                resolve(binaryPath)
+                            })
+                            zipfile.close()
+                        })
                     })
-                    zipfile.close()
                 })
-            })
         })
     }
 }

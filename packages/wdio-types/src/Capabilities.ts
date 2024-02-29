@@ -5,38 +5,38 @@ import type {
 
 type JSONLike = | { [property: string]: JSONLike } | readonly JSONLike[] | string | number | boolean | null
 
-export type PageLoadingStrategy = 'none' | 'eager' | 'normal'
+export type PageLoadingStrategy = 'none' | 'eager' | 'normal';
 export type LoggingPreferenceType =
     'OFF' | 'SEVERE' | 'WARNING' |
     'INFO' | 'CONFIG' | 'FINE' |
-    'FINER' | 'FINEST' | 'ALL'
+    'FINER' | 'FINEST' | 'ALL';
 
 export interface LoggingPreferences {
-    browser?: LoggingPreferenceType
-    driver?: LoggingPreferenceType
-    server?: LoggingPreferenceType
-    client?: LoggingPreferenceType
+    browser?: LoggingPreferenceType;
+    driver?: LoggingPreferenceType;
+    server?: LoggingPreferenceType;
+    client?: LoggingPreferenceType;
 }
 
-export type Timeouts = Record<'script' | 'pageLoad' | 'implicit', number>
+export type Timeouts = Record<'script' | 'pageLoad' | 'implicit', number>;
 
-export type ProxyTypes = 'pac' | 'noproxy' | 'autodetect' | 'system' | 'manual'
+export type ProxyTypes = 'pac' | 'noproxy' | 'autodetect' | 'system' | 'manual';
 
 export interface ProxyObject {
-    proxyType?: ProxyTypes
-    proxyAutoconfigUrl?: string
-    ftpProxy?: string
-    ftpProxyPort?: number
-    httpProxy?: string
-    httpProxyPort?: number
-    sslProxy?: string
-    sslProxyPort?: number
-    socksProxy?: string
-    socksProxyPort?: number
-    socksVersion?: string
-    socksUsername?: string
-    socksPassword?: string
-    noProxy?: string[]
+    proxyType?: ProxyTypes;
+    proxyAutoconfigUrl?: string;
+    ftpProxy?: string;
+    ftpProxyPort?: number;
+    httpProxy?: string;
+    httpProxyPort?: number;
+    sslProxy?: string;
+    sslProxyPort?: number;
+    socksProxy?: string;
+    socksProxyPort?: number;
+    socksVersion?: string;
+    socksUsername?: string;
+    socksPassword?: string;
+    noProxy?: string[];
 }
 
 declare global {
@@ -45,43 +45,43 @@ declare global {
             /**
              * Identifies the user agent.
              */
-            browserName?: string
+            browserName?: string;
             /**
              * Identifies the version of the user agent.
              */
-            browserVersion?: string
+            browserVersion?: string;
             /**
              * Identifies the operating system of the endpoint node.
              */
-            platformName?: string
+            platformName?: string;
             /**
              * Indicates whether untrusted and self-signed TLS certificates are implicitly trusted on navigation for the duration of the session.
              */
-            acceptInsecureCerts?: boolean
+            acceptInsecureCerts?: boolean;
             /**
              * Defines the current session’s page load strategy.
              */
-            pageLoadStrategy?: PageLoadingStrategy
+            pageLoadStrategy?: PageLoadingStrategy;
             /**
              * Defines the current session’s proxy configuration.
              */
-            proxy?: ProxyObject
+            proxy?: ProxyObject;
             /**
              * Indicates whether the remote end supports all of the resizing and repositioning commands.
              */
-            setWindowRect?: boolean
+            setWindowRect?: boolean;
             /**
              * Describes the timeouts imposed on certain session operations.
              */
-            timeouts?: Timeouts
+            timeouts?: Timeouts;
             /**
              * Defines the current session’s strict file interactability.
              */
-            strictFileInteractability?: boolean
+            strictFileInteractability?: boolean,
             /**
              * Describes the current session’s user prompt handler. Defaults to the dismiss and notify state.
              */
-            unhandledPromptBehavior?: string
+            unhandledPromptBehavior?: string;
             /**
              * WebDriver clients opt in to a bidirectional connection by requesting a capability with the name "webSocketUrl" and value true.
              */
@@ -91,17 +91,17 @@ declare global {
 }
 
 export interface W3CCapabilities {
-    alwaysMatch: WebdriverIO.Capabilities
-    firstMatch: WebdriverIO.Capabilities[]
+    alwaysMatch: WebdriverIO.Capabilities;
+    firstMatch: WebdriverIO.Capabilities[];
 }
 
-export type RemoteCapabilities = (DesiredCapabilities | W3CCapabilities)[] | MultiRemoteCapabilities | MultiRemoteCapabilities[]
+export type RemoteCapabilities = (DesiredCapabilities | W3CCapabilities)[] | MultiRemoteCapabilities | MultiRemoteCapabilities[];
 
 export interface MultiRemoteCapabilities {
-    [instanceName: string]: WebDriverIOOptions
+    [instanceName: string]: WebDriverIOOptions;
 }
 
-export type RemoteCapability = DesiredCapabilities | W3CCapabilities | MultiRemoteCapabilities
+export type RemoteCapability = DesiredCapabilities | W3CCapabilities | MultiRemoteCapabilities;
 
 /**
  * @deprecated use `WebdriverIO.Capabilities` instead
@@ -112,43 +112,43 @@ export interface DesiredCapabilities extends WebdriverIO.Capabilities, SauceLabs
     ChromeCapabilities, BrowserStackCapabilities, AppiumXCUITestCapabilities, LambdaTestCapabilities {
 
     // Read-only capabilities
-    cssSelectorsEnabled?: boolean
-    handlesAlerts?: boolean
-    version?: string
-    platform?: string
-    public?: any
+    cssSelectorsEnabled?: boolean;
+    handlesAlerts?: boolean;
+    version?: string;
+    platform?: string;
+    public?: any;
 
     loggingPrefs?: {
-        browser?: LoggingPreferences
-        driver?: LoggingPreferences
-        server?: LoggingPreferences
-        client?: LoggingPreferences
-    }
+        browser?: LoggingPreferences;
+        driver?: LoggingPreferences;
+        server?: LoggingPreferences;
+        client?: LoggingPreferences;
+    };
 
     // Read-write capabilities
-    javascriptEnabled?: boolean
-    databaseEnabled?: boolean
-    locationContextEnabled?: boolean
-    applicationCacheEnabled?: boolean
-    browserConnectionEnabled?: boolean
-    webStorageEnabled?: boolean
-    acceptSslCerts?: boolean
-    rotatable?: boolean
-    nativeEvents?: boolean
-    unexpectedAlertBehaviour?: string
-    elementScrollBehavior?: number
+    javascriptEnabled?: boolean;
+    databaseEnabled?: boolean;
+    locationContextEnabled?: boolean;
+    applicationCacheEnabled?: boolean;
+    browserConnectionEnabled?: boolean;
+    webStorageEnabled?: boolean;
+    acceptSslCerts?: boolean;
+    rotatable?: boolean;
+    nativeEvents?: boolean;
+    unexpectedAlertBehaviour?: string;
+    elementScrollBehavior?: number;
 
     // RemoteWebDriver specific
-    'webdriver.remote.sessionid'?: string
-    'webdriver.remote.quietExceptions'?: boolean
+    'webdriver.remote.sessionid'?: string;
+    'webdriver.remote.quietExceptions'?: boolean;
 
     // Selenese-Backed-WebDriver specific
-    'selenium.server.url'?: string
+    'selenium.server.url'?: string;
 
     // webdriverio specific
-    specs?: string[]
-    exclude?: string[]
-    excludeDriverLogs?: string[]
+    specs?: string[];
+    exclude?: string[];
+    excludeDriverLogs?: string[];
 }
 
 export interface VendorExtensions extends EdgeCapabilities, AppiumCapabilities, WebdriverIO.WDIODevtoolsOptions, WebdriverIOCapabilities, WebdriverIO.WDIOVSCodeServiceOptions {
@@ -170,7 +170,7 @@ export interface VendorExtensions extends EdgeCapabilities, AppiumCapabilities, 
     'bstack:options'?: BrowserStackCapabilities
     'browserstack.local'?: boolean
     'browserstack.accessibility'?: boolean
-    'browserstack.accessibilityOptions'?: { [key: string]: any }
+    'browserstack.accessibilityOptions'?: { [key: string]: any; }
     /**
      * @private
      */
@@ -180,7 +180,7 @@ export interface VendorExtensions extends EdgeCapabilities, AppiumCapabilities, 
 
     'goog:chromeOptions'?: ChromeOptions
     'moz:firefoxOptions'?: FirefoxOptions
-    // This capability is a boolean when send as part of the capabilities to Geckodriver
+    // This capability is a boolean when send as part of the capabilities to Geckodrivr
     // and is being returns as string (e.g. "<host>:<port>") when session capabilities
     // are returned from the driver
     // see https://firefox-source-docs.mozilla.org/testing/geckodriver/Capabilities.html#moz-debuggeraddress
@@ -197,7 +197,7 @@ export interface VendorExtensions extends EdgeCapabilities, AppiumCapabilities, 
     // Safari specific
     'safari.options'?: {
         [name: string]: any
-    }
+    };
 
     /**
      * Selenium 4.0 Specific
@@ -211,47 +211,10 @@ export interface VendorExtensions extends EdgeCapabilities, AppiumCapabilities, 
 }
 
 export interface WebdriverIOCapabilities {
-    /**
-     * process id of driver attached to given session
-     */
-    'wdio:driverPID'?: number
     'wdio:chromedriverOptions'?: WebdriverIO.ChromedriverOptions
     'wdio:safaridriverOptions'?: WebdriverIO.SafaridriverOptions
     'wdio:geckodriverOptions'?: WebdriverIO.GeckodriverOptions
     'wdio:edgedriverOptions'?: WebdriverIO.EdgedriverOptions
-    /**
-    * Maximum number of total parallel running workers (per capability)
-    */
-    'wdio:maxInstances'?: number
-    /**
-     * Maximum number of total parallel running workers (per capability)
-     * @deprecated please use `wdio:maxInstances` instead
-     */
-    maxInstances?: number
-
-    /**
-    * Define specs for test execution. You can either specify a glob
-    * pattern to match multiple files at once or wrap a glob or set of
-    * paths into an array to run them within a single worker process.
-    */
-    'wdio:specs'?: string[]
-    /**
-     * Define specs for test execution. You can either specify a glob
-     * pattern to match multiple files at once or wrap a glob or set of
-     * paths into an array to run them within a single worker process.
-     * @deprecated please use `wdio:specs` instead
-     */
-    specs?: string[]
-
-    /**
-     * Exclude specs from test execution.
-     */
-    'wdio:exclude'?: string[]
-    /**
-     * Exclude specs from test execution.
-     * @deprecated please use `wdio:exclude` instead
-     */
-    exclude?: string[]
 }
 
 export interface ChromeOptions {
@@ -365,21 +328,21 @@ interface MicrosoftEdgeOptions extends ChromeOptions {
 
 export type FirefoxLogLevels =
     'trace' | 'debug' | 'config' |
-    'info' | 'warn' | 'error' | 'fatal'
+    'info' | 'warn' | 'error' | 'fatal';
 
 export interface FirefoxLogObject {
     level: FirefoxLogLevels
 }
 
 export interface GeckodriverCapabilities {
-    'firefox_binary'?: string
-    firefoxProfileTemplate?: string
-    captureNetworkTraffic?: boolean
-    addCustomRequestHeaders?: boolean
-    trustAllSSLCertificates?: boolean
-    changeMaxConnections?: boolean
-    profile?: string
-    pageLoadingStrategy?: string
+    'firefox_binary'?: string;
+    firefoxProfileTemplate?: string;
+    captureNetworkTraffic?: boolean;
+    addCustomRequestHeaders?: boolean;
+    trustAllSSLCertificates?: boolean;
+    changeMaxConnections?: boolean;
+    profile?: string;
+    pageLoadingStrategy?: string;
 }
 
 export interface FirefoxOptions {
@@ -419,7 +382,7 @@ export interface SelenoidOptions {
 
 // Aerokube Moon specific
 export type MoonMobileDeviceOrientation =
-    'portrait' | 'vertical' | 'landscape' | 'horizontal'
+    'portait' | 'vertical' | 'landscape' | 'horizontal'
 
 export interface MoonOptions extends SelenoidOptions {
     mobileDevice?: {
@@ -432,22 +395,22 @@ export interface MoonOptions extends SelenoidOptions {
 // Selenium Grid specific
 export interface GridCapabilities {
     // Grid-specific
-    seleniumProtocol?: string
-    maxInstances?: number
-    environment?: string
+    seleniumProtocol?: string;
+    maxInstances?: number;
+    environment?: string;
 }
 
 // Edge specific
 export interface EdgeCapabilities {
-    'ms:inPrivate'?: boolean
-    'ms:extensionPaths'?: string[]
-    'ms:startPage'?: string
+    'ms:inPrivate'?: boolean;
+    'ms:extensionPaths'?: string[];
+    'ms:startPage'?: string;
 }
 
 // Chrome specific
 export interface ChromeCapabilities {
-    chromeOptions?: ChromeOptions
-    mobileEmulationEnabled?: boolean
+    chromeOptions?: ChromeOptions;
+    mobileEmulationEnabled?: boolean;
 }
 
 /**
@@ -467,7 +430,7 @@ export interface AppiumCapabilities {
      * + 'XCUITest' or 'Instruments' for iOS
      * + 'YouiEngine' for application built with You.i Engine
      */
-    'appium:automationName'?: string
+    'appium:automationName'?: string;
     /**
      * Which mobile OS platform to use.
      *
@@ -476,11 +439,11 @@ export interface AppiumCapabilities {
      * + 'Android'
      * + 'FirefoxOS'
      */
-    'appium:platformName'?: string
+    'appium:platformName'?: string;
     /**
      * Expected mobile OS version, eg: '7.1', '4.4' etc.
      */
-    'appium:platformVersion'?: string
+    'appium:platformVersion'?: string;
     /**
      * The kind of mobile device or emulator to use, for each platform, it accept different kind of values.
      *
@@ -493,7 +456,7 @@ export interface AppiumCapabilities {
      * ### For Android, this capability is currently ignored, though it remains required.
      * Note: This document is written with appium 1.22.1 release, this behavior may changed later.
      */
-    'appium:deviceName'?: string
+    'appium:deviceName'?: string;
     /**
      * The absolute local path or remote http URL to a .ipa file (IOS), .app folder (IOS Simulator), .apk file (Android)
      * or [.apks file (Android App Bundle)](https://appium.github.io/appium.io/docs/en/writing-running-appium/android/android-appbundle/index.html),
@@ -503,41 +466,41 @@ export interface AppiumCapabilities {
      * Note that this capability is not required for Android if you specify appPackage and appActivity capabilities.
      * UiAutomator2 and XCUITest allow to start the session without app or appPackage.
      */
-    'appium:app'?: string
+    'appium:app'?: string;
     /**
      * The id of the app to be tested. eg: 'com.android.chrome'.
      */
-    'appium:appPackage'?: string
-    'appium:appWaitActivity'?: string
-    'appium:newCommandTimeout'?: number
-    'appium:language'?: string
-    'appium:locale'?: string
+    'appium:appPackage'?: string;
+    'appium:appWaitActivity'?: string;
+    'appium:newCommandTimeout'?: number;
+    'appium:language'?: string;
+    'appium:locale'?: string;
     /**
      * iOS Unique Device Identifier
      */
-    'appium:udid'?: string
-    'appium:orientation'?: string
-    'appium:autoWebview'?: boolean
-    'appium:noReset'?: boolean
-    'appium:fullReset'?: boolean
-    'appium:eventTimings'?: boolean
-    'appium:enablePerformanceLogging'?: boolean
-    'appium:printPageSourceOnFindFailure'?: boolean
-    'appium:nativeWebTap'?: boolean
+    'appium:udid'?: string;
+    'appium:orientation'?: string;
+    'appium:autoWebview'?: boolean;
+    'appium:noReset'?: boolean;
+    'appium:fullReset'?: boolean;
+    'appium:eventTimings'?: boolean;
+    'appium:enablePerformanceLogging'?: boolean;
+    'appium:printPageSourceOnFindFailure'?: boolean;
+    'appium:nativeWebTap'?: boolean;
     /**
      * Users as directConnect feature by the server
      * https://appiumpro.com/editions/86-connecting-directly-to-appium-hosts-in-distributed-environments
      */
-    'appium:directConnectProtocol'?: string
-    'appium:directConnectHost'?: string
-    'appium:directConnectPort'?: number
-    'appium:directConnectPath'?: string
+    'appium:directConnectProtocol'?: string;
+    'appium:directConnectHost'?: string;
+    'appium:directConnectPort'?: number;
+    'appium:directConnectPath'?: string;
     /**
      * Windows-specific capability: Please see https://github.com/appium/appium-windows-driver#usage
      * This is a hexadecimal handle of an existing application top level window to attach to. Either this
      * capability or 'appium:app' must be provided on session startup.
      */
-    'appium:appTopLevelWindow'?: string
+    'appium:appTopLevelWindow'?: string;
 }
 
 /**
@@ -546,100 +509,100 @@ export interface AppiumCapabilities {
  * @see https://appium.github.io/appium.io/docs/en/writing-running-appium/caps/#android-only
  */
 export interface AppiumAndroidCapabilities {
-    'appium:appiumVersion'?: string
-    'appium:appActivity'?: string
-    'appium:appPackage'?: string
-    'appium:appWaitActivity'?: string
-    'appium:appWaitPackage'?: string
-    'appium:appWaitDuration'?: number
-    'appium:deviceReadyTimeout'?: number
-    'appium:allowTestPackages'?: boolean
-    'appium:androidCoverage'?: string
-    'appium:androidCoverageEndIntent'?: string
-    'appium:androidDeviceReadyTimeout'?: number
-    'appium:androidInstallTimeout'?: number
-    'appium:androidInstallPath'?: string
-    'appium:adbPort'?: number
-    'appium:systemPort'?: number
-    'appium:remoteAdbHost'?: string
-    'appium:androidDeviceSocket'?: string
-    'appium:avd'?: string
-    'appium:avdLaunchTimeout'?: number
-    'appium:avdReadyTimeout'?: number
-    'appium:avdArgs'?: string
-    'appium:useKeystore'?: boolean
-    'appium:keystorePath'?: string
-    'appium:keystorePassword'?: string
-    'appium:keyAlias'?: string
-    'appium:keyPassword'?: string
-    'appium:chromedriverExecutable'?: string
-    'appium:chromedriverArgs'?: string[]
-    'appium:chromedriverExecutableDir'?: string
-    'appium:chromedriverChromeMappingFile'?: string
-    'appium:chromedriverUseSystemExecutable'?: boolean
-    'appium:autoWebviewTimeout'?: number
-    'appium:chromedriverPort'?: number
+    'appium:appiumVersion'?: string;
+    'appium:appActivity'?: string;
+    'appium:appPackage'?: string;
+    'appium:appWaitActivity'?: string;
+    'appium:appWaitPackage'?: string;
+    'appium:appWaitDuration'?: number;
+    'appium:deviceReadyTimeout'?: number;
+    'appium:allowTestPackages'?: boolean;
+    'appium:androidCoverage'?: string;
+    'appium:androidCoverageEndIntent'?: string;
+    'appium:androidDeviceReadyTimeout'?: number;
+    'appium:androidInstallTimeout'?: number;
+    'appium:androidInstallPath'?: string;
+    'appium:adbPort'?: number;
+    'appium:systemPort'?: number;
+    'appium:remoteAdbHost'?: string;
+    'appium:androidDeviceSocket'?: string;
+    'appium:avd'?: string;
+    'appium:avdLaunchTimeout'?: number;
+    'appium:avdReadyTimeout'?: number;
+    'appium:avdArgs'?: string;
+    'appium:useKeystore'?: boolean;
+    'appium:keystorePath'?: string;
+    'appium:keystorePassword'?: string;
+    'appium:keyAlias'?: string;
+    'appium:keyPassword'?: string;
+    'appium:chromedriverExecutable'?: string;
+    'appium:chromedriverArgs'?: string[];
+    'appium:chromedriverExecutableDir'?: string;
+    'appium:chromedriverChromeMappingFile'?: string;
+    'appium:chromedriverUseSystemExecutable'?: boolean;
+    'appium:autoWebviewTimeout'?: number;
+    'appium:chromedriverPort'?: number;
     'appium:chromedriverPorts'?: (number | number[])[]
-    'appium:intentAction'?: string
-    'appium:intentCategory'?: string
-    'appium:intentFlags'?: string
-    'appium:optionalIntentArguments'?: string
-    'appium:dontStopAppOnReset'?: boolean
-    'appium:unicodeKeyboard'?: boolean
-    'appium:resetKeyboard'?: boolean
-    'appium:noSign'?: boolean
-    'appium:ignoreUnimportantViews'?: boolean
-    'appium:disableAndroidWatchers'?: boolean
-    'appium:recreateChromeDriverSessions'?: boolean
-    'appium:nativeWebScreenshot'?: boolean
-    'appium:androidScreenshotPath'?: string
-    'appium:autoGrantPermissions'?: boolean
-    'appium:networkSpeed'?: string
-    'appium:gpsEnabled'?: boolean
-    'appium:isHeadless'?: boolean
-    'appium:adbExecTimeout'?: number
-    'appium:localeScript'?: string
-    'appium:skipDeviceInitialization'?: boolean
-    'appium:chromedriverDisableBuildCheck'?: boolean
-    'appium:skipUnlock'?: boolean
-    'appium:unlockType'?: string
-    'appium:unlockKey'?: string
-    'appium:autoLaunch'?: boolean
-    'appium:skipLogcatCapture'?: boolean
-    'appium:uninstallOtherPackages'?: string
-    'appium:disableWindowAnimation'?: boolean
-    'appium:otherApps'?: string | string[]
-    'appium:uiautomator2ServerLaunchTimeout'?: number
-    'appium:uiautomator2ServerInstallTimeout'?: number
-    'appium:skipServerInstallation'?: boolean
-    'appium:espressoServerLaunchTimeout'?: number
-    'appium:disableSuppressAccessibilityService'?: boolean
-    'appium:hideKeyboard'?: boolean
-    'appium:autoWebviewName'?: string
+    'appium:intentAction'?: string;
+    'appium:intentCategory'?: string;
+    'appium:intentFlags'?: string;
+    'appium:optionalIntentArguments'?: string;
+    'appium:dontStopAppOnReset'?: boolean;
+    'appium:unicodeKeyboard'?: boolean;
+    'appium:resetKeyboard'?: boolean;
+    'appium:noSign'?: boolean;
+    'appium:ignoreUnimportantViews'?: boolean;
+    'appium:disableAndroidWatchers'?: boolean;
+    'appium:recreateChromeDriverSessions'?: boolean;
+    'appium:nativeWebScreenshot'?: boolean;
+    'appium:androidScreenshotPath'?: string;
+    'appium:autoGrantPermissions'?: boolean;
+    'appium:networkSpeed'?: string;
+    'appium:gpsEnabled'?: boolean;
+    'appium:isHeadless'?: boolean;
+    'appium:adbExecTimeout'?: number;
+    'appium:localeScript'?: string;
+    'appium:skipDeviceInitialization'?: boolean;
+    'appium:chromedriverDisableBuildCheck'?: boolean;
+    'appium:skipUnlock'?: boolean;
+    'appium:unlockType'?: string;
+    'appium:unlockKey'?: string;
+    'appium:autoLaunch'?: boolean;
+    'appium:skipLogcatCapture'?: boolean;
+    'appium:uninstallOtherPackages'?: string;
+    'appium:disableWindowAnimation'?: boolean;
+    'appium:otherApps'?: string | string[];
+    'appium:uiautomator2ServerLaunchTimeout'?: number;
+    'appium:uiautomator2ServerInstallTimeout'?: number;
+    'appium:skipServerInstallation'?: boolean;
+    'appium:espressoServerLaunchTimeout'?: number;
+    'appium:disableSuppressAccessibilityService'?: boolean;
+    'appium:hideKeyboard'?: boolean;
+    'appium:autoWebviewName'?: string;
 
-    'appium:uiautomator2ServerReadTimeout'?: number
-    'appium:appWaitForLaunch'?: boolean
-    'appium:remoteAppsCacheLimit'?: number
-    'appium:enforceAppInstall'?: boolean
-    'appium:clearDeviceLogsOnStart'?: boolean
-    'appium:buildToolsVersion'?: string
-    'appium:suppressKillServer'?: boolean
-    'appium:ignoreHiddenApiPolicyError'?: boolean
-    'appium:mockLocationApp'?: string
-    'appium:logcatFormat'?: string
-    'appium:logcatFilterSpecs'?: string
-    'appium:allowDelayAdb'?: boolean
-    'appium:avdEnv'?: { [key: string]: string }
-    'appium:unlockStrategy'?: string
-    'appium:unlockSuccessTimeout'?: number
-    'appium:webviewDevtoolsPort'?: number
-    'appium:ensureWebviewsHavePages'?: boolean
-    'appium:enableWebviewDetailsCollection'?: boolean
-    'appium:extractChromeAndroidPackageFromContextName'?: boolean
-    'appium:showChromedriverLog'?: boolean
-    'appium:chromeOptions'?: { [key: string]: any }
-    'appium:chromeLoggingPrefs'?: { [key: string]: any }
-    'appium:userProfile'?: number
+    'appium:uiautomator2ServerReadTimeout'?: number;
+    'appium:appWaitForLaunch'?: boolean;
+    'appium:remoteAppsCacheLimit'?: number;
+    'appium:enforceAppInstall'?: boolean;
+    'appium:clearDeviceLogsOnStart'?: boolean;
+    'appium:buildToolsVersion'?: string;
+    'appium:suppressKillServer'?: boolean;
+    'appium:ignoreHiddenApiPolicyError'?: boolean;
+    'appium:mockLocationApp'?: string;
+    'appium:logcatFormat'?: string;
+    'appium:logcatFilterSpecs'?: string;
+    'appium:allowDelayAdb'?: boolean;
+    'appium:avdEnv'?: { [key: string]: string };
+    'appium:unlockStrategy'?: string;
+    'appium:unlockSuccessTimeout'?: number;
+    'appium:webviewDevtoolsPort'?: number;
+    'appium:ensureWebviewsHavePages'?: boolean;
+    'appium:enableWebviewDetailsCollection'?: boolean;
+    'appium:extractChromeAndroidPackageFromContextName'?: boolean;
+    'appium:showChromedriverLog'?: boolean;
+    'appium:chromeOptions'?: { [key: string]: any };
+    'appium:chromeLoggingPrefs'?: { [key: string]: any };
+    'appium:userProfile'?: number;
 }
 
 /**
@@ -648,169 +611,169 @@ export interface AppiumAndroidCapabilities {
  * @see https://github.com/appium/appium-xcuitest-driver
  */
 export interface AppiumXCUITestCapabilities {
-    'appium:platformName'?: string
-    'appium:browserName'?: string
-    'appium:app'?: string
-    'appium:calendarFormat'?: string
-    'appium:bundleId'?: string
-    'appium:launchTimeout'?: number
-    'appium:udid'?: string
-    'appium:appName'?: string
-    'appium:waitForAppScript'?: string
-    'appium:sendKeyStrategy'?: string
-    'appium:screenshotWaitTimeout'?: number
-    'appium:interKeyDelay'?: number
-    'appium:nativeInstrumentsLib'?: boolean
-    'appium:autoAcceptAlerts'?: boolean
-    'appium:autoDismissAlerts'?: boolean
-    'appium:nativeWebTap'?: boolean
-    'appium:safariInitialUrl'?: string
-    'appium:safariAllowPopups'?: boolean
-    'appium:safariIgnoreFraudWarning'?: boolean
-    'appium:safariOpenLinksInBackground'?: boolean
-    'appium:safariShowFullResponse'?: boolean
-    'appium:keepKeyChains'?: boolean
-    'appium:locationServicesEnabled'?: boolean
-    'appium:locationServicesAuthorized'?: boolean
-    'appium:resetLocationService'?: boolean
-    'appium:localizableStringsDir'?: string
-    'appium:processArguments'?: string | AppiumXCUIProcessArguments
-    'appium:showIOSLog'?: boolean
-    'appium:webviewConnectRetries'?: number
-    'appium:clearSystemFiles'?: boolean
-    'appium:customSSLCert'?: string
-    'appium:webkitResponseTimeout'?: number
-    'appium:webkitDebugProxyPort'?: number
-    'appium:remoteDebugProxy'?: string
-    'appium:enablePerformanceLogging'?: boolean
-    'appium:enableAsyncExecuteFromHttps'?: boolean
-    'appium:fullContextList'?: boolean
-    'appium:ignoreAboutBlankUrl'?: boolean
-    'appium:skipLogCapture'?: boolean
-    'appium:deviceName'?: string
-    'appium:showXcodeLog'?: boolean
-    'appium:wdaLocalPort'?: number
-    'appium:wdaBaseUrl'?: string
-    'appium:iosInstallPause'?: number
-    'appium:xcodeConfigFile'?: string
-    'appium:xcodeOrgId'?: string
-    'appium:xcodeSigningId'?: string
-    'appium:keychainPath'?: string
-    'appium:keychainPassword'?: string
-    'appium:bootstrapPath'?: string
-    'appium:agentPath'?: string
-    'appium:tapWithShortPressDuration'?: number
-    'appium:scaleFactor'?: string
-    'appium:usePrebuiltWDA'?: boolean
-    'appium:usePreinstalledWDA'?: boolean
-    'appium:webDriverAgentUrl'?: string
-    'appium:derivedDataPath'?: string
-    'appium:launchWithIDB'?: boolean
-    'appium:useNewWDA'?: boolean
-    'appium:wdaLaunchTimeout'?: number
-    'appium:wdaConnectionTimeout'?: number
-    'appium:updatedWDABundleId'?: string
-    'appium:resetOnSessionStartOnly'?: boolean
-    'appium:commandTimeouts'?: string | AppiumXCUICommandTimeouts
-    'appium:wdaStartupRetries'?: number
-    'appium:wdaStartupRetryInterval'?: number
-    'appium:prebuildWDA'?: boolean
-    'appium:connectHardwareKeyboard'?: boolean
-    'appium:forceTurnOnSoftwareKeyboardSimulator'?: boolean
-    'appium:simulatorPasteboardAutomaticSync'?: string
-    'appium:simulatorDevicesSetPath'?: string
-    'appium:calendarAccessAuthorized'?: boolean
-    'appium:useSimpleBuildTest'?: boolean
-    'appium:waitForQuiescence'?: boolean
-    'appium:maxTypingFrequency'?: number
-    'appium:nativeTyping'?: boolean
-    'appium:simpleIsVisibleCheck'?: boolean
-    'appium:shouldUseSingletonTestManager'?: boolean
-    'appium:isHeadless'?: boolean
-    'appium:autoGrantPermissions'?: boolean
-    'appium:useXctestrunFile'?: boolean
-    'appium:absoluteWebLocations'?: boolean
-    'appium:simulatorWindowCenter'?: string
-    'appium:simulatorStartupTimeout'?: number
-    'appium:simulatorTracePointer'?: boolean
-    'appium:useJSONSource'?: boolean
-    'appium:enforceFreshSimulatorCreation'?: boolean
-    'appium:shutdownOtherSimulators'?: boolean
-    'appium:keychainsExcludePatterns'?: string
-    'appium:showSafariConsoleLog'?: boolean
-    'appium:showSafariNetworkLog'?: boolean
-    'appium:safariGarbageCollect'?: boolean
-    'appium:safariGlobalPreferences'?: AppiumXCUISafariGlobalPreferences
-    'appium:safariLogAllCommunication'?: boolean
-    'appium:safariLogAllCommunicationHexDump'?: boolean
-    'appium:safariSocketChunkSize'?: number
-    'appium:mjpegServerPort'?: number
-    'appium:reduceMotion'?: boolean
-    'appium:mjpegScreenshotUrl'?: string
-    'appium:permissions'?: string
-    'appium:screenshotQuality'?: number
-    'appium:wdaEventloopIdleDelay'?: number
-    'appium:otherApps'?: string | string[]
-    'appium:includeSafariInWebviews'?: boolean
-    'appium:additionalWebviewBundleIds'?: Array<string>
-    'appium:webviewConnectTimeout'?: number
-    'appium:iosSimulatorLogsPredicate'?: string
-    'appium:appPushTimeout'?: number
-    'appium:nativeWebTapStrict'?: boolean
-    'appium:safariWebInspectorMaxFrameLength'?: number
-    'appium:allowProvisioningDeviceRegistration'?: boolean
-    'appium:waitForIdleTimeout'?: number
-    'appium:resultBundlePath'?: string
-    'appium:resultBundleVersion'?: number
-    'appium:safariIgnoreWebHostnames'?: string
-    'appium:includeDeviceCapsToSessionInfo'?: boolean
-    'appium:disableAutomaticScreenshots'?: boolean
-    'appium:shouldTerminateApp'?: boolean
-    'appium:forceAppLaunch'?: boolean
-    'appium:useNativeCachingStrategy'?: boolean
-    'appium:appInstallStrategy'?: string
+    'appium:platformName'?: string;
+    'appium:browserName'?: string;
+    'appium:app'?: string;
+    'appium:calendarFormat'?: string;
+    'appium:bundleId'?: string;
+    'appium:launchTimeout'?: number;
+    'appium:udid'?: string;
+    'appium:appName'?: string;
+    'appium:waitForAppScript'?: string;
+    'appium:sendKeyStrategy'?: string;
+    'appium:screenshotWaitTimeout'?: number;
+    'appium:interKeyDelay'?: number;
+    'appium:nativeInstrumentsLib'?: boolean;
+    'appium:autoAcceptAlerts'?: boolean;
+    'appium:autoDismissAlerts'?: boolean;
+    'appium:nativeWebTap'?: boolean;
+    'appium:safariInitialUrl'?: string;
+    'appium:safariAllowPopups'?: boolean;
+    'appium:safariIgnoreFraudWarning'?: boolean;
+    'appium:safariOpenLinksInBackground'?: boolean;
+    'appium:safariShowFullResponse'?: boolean;
+    'appium:keepKeyChains'?: boolean;
+    'appium:locationServicesEnabled'?: boolean;
+    'appium:locationServicesAuthorized'?: boolean;
+    'appium:resetLocationService'?: boolean;
+    'appium:localizableStringsDir'?: string;
+    'appium:processArguments'?: string|AppiumXCUIProcessArguments;
+    'appium:showIOSLog'?: boolean;
+    'appium:webviewConnectRetries'?: number;
+    'appium:clearSystemFiles'?: boolean;
+    'appium:customSSLCert'?: string;
+    'appium:webkitResponseTimeout'?: number;
+    'appium:webkitDebugProxyPort'?: number;
+    'appium:remoteDebugProxy'?: string;
+    'appium:enablePerformanceLogging'?: boolean;
+    'appium:enableAsyncExecuteFromHttps'?: boolean;
+    'appium:fullContextList'?: boolean;
+    'appium:ignoreAboutBlankUrl'?: boolean;
+    'appium:skipLogCapture'?: boolean;
+    'appium:deviceName'?: string;
+    'appium:showXcodeLog'?: boolean;
+    'appium:wdaLocalPort'?: number;
+    'appium:wdaBaseUrl'?: string;
+    'appium:iosInstallPause'?: number;
+    'appium:xcodeConfigFile'?: string;
+    'appium:xcodeOrgId'?: string;
+    'appium:xcodeSigningId'?: string;
+    'appium:keychainPath'?: string;
+    'appium:keychainPassword'?: string;
+    'appium:bootstrapPath'?: string;
+    'appium:agentPath'?: string;
+    'appium:tapWithShortPressDuration'?: number;
+    'appium:scaleFactor'?: string;
+    'appium:usePrebuiltWDA'?: boolean;
+    'appium:usePreinstalledWDA'?: boolean;
+    'appium:webDriverAgentUrl'?: string;
+    'appium:derivedDataPath'?: string;
+    'appium:launchWithIDB'?: boolean;
+    'appium:useNewWDA'?: boolean;
+    'appium:wdaLaunchTimeout'?: number;
+    'appium:wdaConnectionTimeout'?: number;
+    'appium:updatedWDABundleId'?: string;
+    'appium:resetOnSessionStartOnly'?: boolean;
+    'appium:commandTimeouts'?: string|AppiumXCUICommandTimeouts;
+    'appium:wdaStartupRetries'?: number;
+    'appium:wdaStartupRetryInterval'?: number;
+    'appium:prebuildWDA'?: boolean;
+    'appium:connectHardwareKeyboard'?: boolean;
+    'appium:forceTurnOnSoftwareKeyboardSimulator'?: boolean;
+    'appium:simulatorPasteboardAutomaticSync'?: string;
+    'appium:simulatorDevicesSetPath'?: string;
+    'appium:calendarAccessAuthorized'?: boolean;
+    'appium:useSimpleBuildTest'?: boolean;
+    'appium:waitForQuiescence'?: boolean;
+    'appium:maxTypingFrequency'?: number;
+    'appium:nativeTyping'?: boolean;
+    'appium:simpleIsVisibleCheck'?: boolean;
+    'appium:shouldUseSingletonTestManager'?: boolean;
+    'appium:isHeadless'?: boolean;
+    'appium:autoGrantPermissions'?: boolean;
+    'appium:useXctestrunFile'?: boolean;
+    'appium:absoluteWebLocations'?: boolean;
+    'appium:simulatorWindowCenter'?: string;
+    'appium:simulatorStartupTimeout'?: number;
+    'appium:simulatorTracePointer'?: boolean;
+    'appium:useJSONSource'?: boolean;
+    'appium:enforceFreshSimulatorCreation'?: boolean;
+    'appium:shutdownOtherSimulators'?: boolean;
+    'appium:keychainsExcludePatterns'?: string;
+    'appium:showSafariConsoleLog'?: boolean;
+    'appium:showSafariNetworkLog'?: boolean;
+    'appium:safariGarbageCollect'?: boolean;
+    'appium:safariGlobalPreferences'?: AppiumXCUISafariGlobalPreferences;
+    'appium:safariLogAllCommunication'?: boolean;
+    'appium:safariLogAllCommunicationHexDump'?: boolean;
+    'appium:safariSocketChunkSize'?: number;
+    'appium:mjpegServerPort'?: number;
+    'appium:reduceMotion'?: boolean;
+    'appium:mjpegScreenshotUrl'?: string;
+    'appium:permissions'?: string;
+    'appium:screenshotQuality'?: number;
+    'appium:wdaEventloopIdleDelay'?: number;
+    'appium:otherApps'?: string | string[];
+    'appium:includeSafariInWebviews'?: boolean;
+    'appium:additionalWebviewBundleIds'?: Array<string>;
+    'appium:webviewConnectTimeout'?: number;
+    'appium:iosSimulatorLogsPredicate'?: string;
+    'appium:appPushTimeout'?: number;
+    'appium:nativeWebTapStrict'?: boolean;
+    'appium:safariWebInspectorMaxFrameLength'?: number;
+    'appium:allowProvisioningDeviceRegistration'?: boolean;
+    'appium:waitForIdleTimeout'?: number;
+    'appium:resultBundlePath'?: string;
+    'appium:resultBundleVersion'?: number;
+    'appium:safariIgnoreWebHostnames'?: string;
+    'appium:includeDeviceCapsToSessionInfo'?: boolean;
+    'appium:disableAutomaticScreenshots'?: boolean;
+    'appium:shouldTerminateApp'?: boolean;
+    'appium:forceAppLaunch'?: boolean;
+    'appium:useNativeCachingStrategy'?: boolean;
+    'appium:appInstallStrategy'?: string;
     /**
      * Windows Application Driver capabilities
      */
-    'appium:appArguments'?: string
+    'appium:appArguments'?: string;
 }
 
 export interface AppiumXCUISafariGlobalPreferences {
-    [key: string]: any
+    [key: string]: any;
 }
 
 export interface AppiumXCUIProcessArguments {
     args?: Array<string>
-    env?: { [key: string]: any }
+    env?: { [key: string]: any;}
 }
 
 export interface AppiumXCUICommandTimeouts {
-    [key: string]: any
+    [key: string]: any;
 }
 
 // IE specific
 export interface IECapabilities {
-    'ie.forceCreateProcessApi'?: boolean
-    'ie.browserCommandLineSwitches'?: string
-    'ie.usePerProcessProxy'?: boolean
-    'ie.ensureCleanSession'?: boolean
-    'ie.setProxyByServer'?: boolean
-    'ie.fileUploadDialogTimeout'?: number
-    'ie.edgechromium'?: boolean
-    'ie.edgepath'?: string
-    ignoreProtectedModeSettings?: boolean
-    ignoreZoomSetting?: boolean
-    initialBrowserUrl?: string
-    enablePersistentHover?: boolean
-    enableElementCacheCleanup?: boolean
-    requireWindowFocus?: boolean
-    browserAttachTimeout?: number
-    logFile?: string
-    logLevel?: string
-    host?: string
-    extractPath?: string
-    silent?: string
-    killProcessesByName?: boolean
+    'ie.forceCreateProcessApi'?: boolean;
+    'ie.browserCommandLineSwitches'?: string;
+    'ie.usePerProcessProxy'?: boolean;
+    'ie.ensureCleanSession'?: boolean;
+    'ie.setProxyByServer'?: boolean;
+    'ie.fileUploadDialogTimeout'?: number;
+    'ie.edgechromium'?: boolean;
+    'ie.edgepath'?: string;
+    ignoreProtectedModeSettings?: boolean;
+    ignoreZoomSetting?: boolean;
+    initialBrowserUrl?: string;
+    enablePersistentHover?: boolean;
+    enableElementCacheCleanup?: boolean;
+    requireWindowFocus?: boolean;
+    browserAttachTimeout?: number;
+    logFile?: string;
+    logLevel?: string;
+    host?: string;
+    extractPath?: string;
+    silent?: string;
+    killProcessesByName?: boolean;
 }
 
 /**
@@ -1104,21 +1067,17 @@ export interface SauceLabsCapabilities {
     appiumVersion?: string
 }
 
-export interface LambdaTestCapabilities {
+export interface LambdaTestCapabilities{
     username?: string
     accessKey?: string
     platformName?: string
-    deviceName?: string
-    platformVersion?: string
-    app?: string
     browserName?: string
-    browserVersion?: string
+    browserVersion? : string
     /**
      * Set the resolution of the VM.
      */
     resolution?: string
     selenium_version?: string
-    driver_version?: string
     headless?: boolean
     seCdp?: boolean
     /**
@@ -1134,7 +1093,7 @@ export interface LambdaTestCapabilities {
      * These tags can be used to filter the builds on the Automate dashboard.
      */
     buildTags?: Array<string>
-    'smartUI.project'?: string
+    smartUiProject?: string
     /**
      * Use this capability to add names to the tests.
      */
@@ -1144,7 +1103,6 @@ export interface LambdaTestCapabilities {
      * These tags can be used to filter the tests on the Automate dashboard.
      */
     tags?: Array<string>
-    devicelog?: boolean
     visual?: boolean
     video?: boolean
     /**
@@ -1153,28 +1111,11 @@ export interface LambdaTestCapabilities {
      * LambdaTest Tunnel (https://www.lambdatest.com/support/docs/testing-locally-hosted-pages).
      */
     tunnel?: boolean
-    tunnelName?: string
     /**
      * Capture browser console logs at various steps in the test.
      */
-    console?: 'warn' | 'error' | 'warn' | 'info' | 'true' | 'false'
+    console?: 'warn' | 'error' | 'warn' | 'info' | 'true'
     network?: boolean
-    timezone?: string
-    geoLocation?: string
-    location?: {
-        lat: string
-        long: string
-    }
-    language?: string
-    locale?: string
-    idleTimeout?: number
-    queueTimeout?: number
-    autoGrantPermissions?: boolean
-    autoAcceptAlerts?: boolean
-    otherApps?: Array<string>
-    isRealMobile?: boolean
-    networkThrottling?: string,
-    deviceOrientation?: 'portrait' | 'landscape'
 }
 
 export interface BrowserStackCapabilities {
@@ -1213,7 +1154,7 @@ export interface BrowserStackCapabilities {
      */
     debug?: boolean
     networkLogs?: boolean
-    /**
+     /**
      * https://www.browserstack.com/docs/app-automate/appium/debug-failed-tests/network-logs
      * Enable viewing the response data in the Network Logs tab on your session
      */
@@ -1263,7 +1204,7 @@ export interface BrowserStackCapabilities {
      */
     'browserstack.maskCommands'?: string[]
     /**
-     * BrowserStack triggers `BROWSERSTACK_IDLE_TIMEOUT` error when a session
+     * BrowerStack triggers `BROWSERSTACK_IDLE_TIMEOUT` error when a session
      * is left idle for more than `idleTimeout` seconds. This happens as BrowserStack by
      * default waits for the timeout duration for additional steps or commands
      * to run. If no command is received during that time, the session is stopped,
@@ -1376,20 +1317,12 @@ export interface BrowserStackCapabilities {
     buildIdentifier?: string
 
     accessibility?: boolean
-    accessibilityOptions?: { [key: string]: any }
+    accessibilityOptions?: { [key: string]: any; }
 
     'browserstack.buildIdentifier'?: string
     'browserstack.localIdentifier'?: string
     'browserstack.accessibility'?: boolean
-    'browserstack.accessibilityOptions'?: { [key: string]: any }
-
-    appStoreConfiguration?: { username: string, password: string }
-    gpsLocation?: string
-    disableAnimations?: boolean
-    midSessionInstallApps?: Array<string>
-    uploadMedia?: Array<string>
-    enablePasscode?: boolean
-    deviceLogs?: boolean
+    'browserstack.accessibilityOptions'?: { [key: string]: any; }
 }
 
 export interface SauceLabsVisualCapabilities {
@@ -1483,38 +1416,38 @@ export interface SauceLabsVisualCapabilities {
  * https://testingbot.com/support/other/test-options#platform
  */
 export interface TestingbotCapabilities {
-    name?: string
-    tags?: string[]
-    build?: string | number | number
-    public?: boolean
-    'tunnel-identifier'?: string
-    realDevice?: boolean
-    'selenium-version'?: string
-    chromedriverVersion?: string
-    iedriverVersion?: string
-    edgedriverVersion?: string
-    geckodriverVersion?: string
-    operaDriverVersion?: string
-    timeZone?: string
-    upload?: string
-    'testingbot.geoCountryCode'?: string
-    idletimeout?: number
-    'load-extension'?: string
+    name?: string;
+    tags?: string[];
+    build?: string | number | number;
+    public?: boolean;
+    'tunnel-identifier'?: string;
+    realDevice?: boolean;
+    'selenium-version'?: string;
+    chromedriverVersion?: string;
+    iedriverVersion?: string;
+    edgedriverVersion?: string;
+    geckodriverVersion?: string;
+    operaDriverVersion?: string;
+    timeZone?: string;
+    upload?: string;
+    'testingbot.geoCountryCode'?: string;
+    idletimeout?: number;
+    'load-extension'?: string;
 }
 
 export interface SeleniumRCCapabilities {
     // Selenium RC (1.0) only
-    commandLineFlags?: string
-    executablePath?: string
-    timeoutInSeconds?: number
-    onlyProxySeleniumTraffic?: boolean
-    avoidProxy?: boolean
-    proxyEverything?: boolean
-    proxyRequired?: boolean
-    browserSideLog?: boolean
-    optionsSet?: boolean
-    singleWindow?: boolean
-    dontInjectRegex?: RegExp
-    userJSInjection?: boolean
-    userExtensions?: string
+    commandLineFlags?: string;
+    executablePath?: string;
+    timeoutInSeconds?: number;
+    onlyProxySeleniumTraffic?: boolean;
+    avoidProxy?: boolean;
+    proxyEverything?: boolean;
+    proxyRequired?: boolean;
+    browserSideLog?: boolean;
+    optionsSet?: boolean;
+    singleWindow?: boolean;
+    dontInjectRegex?: RegExp;
+    userJSInjection?: boolean;
+    userExtensions?: string;
 }

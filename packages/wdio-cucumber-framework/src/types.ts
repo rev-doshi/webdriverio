@@ -59,7 +59,7 @@ export interface CucumberOptions {
      * "random" or "random:42" whereas 42 is the seed for randomization
      * @default defined
      */
-    order?: 'defined' | 'random' | `random:${string}`;
+    order?: string;
     /**
      * Publish a report of your test run to https://reports.cucumber.io/
      */

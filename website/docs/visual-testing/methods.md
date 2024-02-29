@@ -30,13 +30,6 @@ await browser.saveElement(
 );
 ```
 
-#### Support
-
-- Desktop Browsers
-- Mobile Browsers
-- Mobile Hybrid Apps
-- Mobile Native Apps
-
 #### Parameters
 
 -   **`element`:**
@@ -70,13 +63,6 @@ await browser.saveScreen(
 );
 ```
 
-#### Support
-
-- Desktop Browsers
-- Mobile Browsers
-- Mobile Hybrid Apps
-- Mobile Native Apps
-
 #### Parameters
 -   **`tag`:**
     -   **Mandatory:** Yes
@@ -106,11 +92,6 @@ await browser.saveFullPageScreen(
 );
 ```
 
-#### Support
-
-- Desktop Browsers
-- Mobile Browsers
-
 #### Parameters
 -   **`tag`:**
     -   **Mandatory:** Yes
@@ -139,10 +120,6 @@ await browser.saveTabbablePage(
     }
 );
 ```
-
-#### Support
-
-- Desktop Browsers
 
 #### Parameters
 -   **`tag`:**
@@ -192,13 +169,6 @@ await browser.checkElement(
 );
 ```
 
-#### Support
-
-- Desktop Browsers
-- Mobile Browsers
-- Mobile Hybrid Apps
-- Mobile Native Apps
-
 #### Parameters
 -   **`element`:**
     -   **Mandatory:** Yes
@@ -231,13 +201,6 @@ await browser.checkScreen(
 );
 ```
 
-#### Support
-
-- Desktop Browsers
-- Mobile Browsers
-- Mobile Hybrid Apps
-- Mobile Native Apps
-
 #### Parameters
 -   **`tag`:**
     -   **Mandatory:** Yes
@@ -267,11 +230,6 @@ await browser.checkFullPageScreen(
 );
 ```
 
-#### Support
-
-- Desktop Browsers
-- Mobile Browsers
-
 #### Parameters
 -   **`tag`:**
     -   **Mandatory:** Yes
@@ -300,10 +258,6 @@ await browser.checkTabbablePage(
     }
 );
 ```
-
-#### Support
-
-- Desktop Browsers
 
 #### Parameters
 -   **`tag`:**

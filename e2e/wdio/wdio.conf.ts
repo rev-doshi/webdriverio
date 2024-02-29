@@ -17,9 +17,7 @@ export const config: Options.Testrunner = {
     capabilities: [{
         browserName: 'chrome',
         browserVersion: 'stable',
-        'goog:chromeOptions': {
-            args: ['headless', 'disable-gpu']
-        }
+        'wdio:devtoolsOptions': { headless: true, dumpio: true }
     }],
     bail: 1,
     services: ['devtools'],

@@ -1,3 +1,6 @@
+import { getBrowserObject } from '../../utils/index.js'
+import getPropertyScript from '../../scripts/getProperty.js'
+
 /**
  * The Get Element Property command will return the result of getting a property of an element.
  *
@@ -18,5 +21,14 @@ export function getProperty (
     this: WebdriverIO.Element,
     property: string
 ) {
-    return this.getElementProperty(this.elementId, property)
+    if (this.isW3C) {
+        return this.getElementProperty(this.elementId, property)
+    }
+
+    const browser = getBrowserObject(this)
+    return browser.execute(
+        getPropertyScript,
+        { ELEMENT: this.elementId } as any as HTMLElement,
+        property
+    )
 }

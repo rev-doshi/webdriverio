@@ -11,7 +11,7 @@ We are thrilled to share some fantastic news: WebdriverIO and [BrowserStack](htt
     <ImageSwitcher
         lightImageSrc="/img/blog/wdio-plus-bs-black.png"
         darkImageSrc="/img/blog/wdio-plus-bs-white.png"
-        alt="WebdriverIO partners with BrowserStack"
+        alt="BrowserStack"
     />
 </p>
 

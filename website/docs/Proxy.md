@@ -10,29 +10,53 @@ You can tunnel two different types of request through a proxy:
 
 ## Proxy Between Driver And Test
 
-If your company has a corporate proxy (e.g. on `http://my.corp.proxy.com:9090`) for all outgoing requests, follow the below steps to install and configure [undici](https://github.com/nodejs/undici).
+If your company has a corporate proxy (e.g. on `http://my.corp.proxy.com:9090`) for all outgoing requests, follow the below steps to install and configure [global-agent](https://github.com/gajus/global-agent).
 
-### Install undici
+### Install global-agent
 
 ```bash npm2yarn
-npm install undici --save-dev
+npm install global-agent --save-dev
 ```
 
-### Add undici setGlobalDispatcher to your config file
+### Add global-agent bootstrap to your config file
 
 Add the following require statement to the top of your config file.
 
 ```js title="wdio.conf.js"
-import { setGlobalDispatcher, ProxyAgent } from 'undici';
-
-const dispatcher = new ProxyAgent({ uri: new URL(process.env.https_proxy).toString() });
-setGlobalDispatcher(dispatcher);
+import { bootstrap } from 'global-agent';
+bootstrap();
 
 export const config = {
     // ...
 }
 ```
-Additional information about configuring the proxy can be located [here](https://github.com/nodejs/undici/blob/main/docs/api/ProxyAgent.md).
+
+### Set global-agent environment variables
+
+Before you start the test, make sure you've exported the variable in the terminal, like so:
+
+```sh
+export GLOBAL_AGENT_HTTP_PROXY=http://my.corp.proxy.com:9090
+wdio wdio.conf.js
+```
+
+You can exclude URLs from the proxy by exporting the variable, like so:
+
+```sh
+export GLOBAL_AGENT_HTTP_PROXY=http://my.corp.proxy.com:9090
+export GLOBAL_AGENT_NO_PROXY='.foo.com'
+wdio wdio.conf.js
+```
+
+If necessary, you can specify `GLOBAL_AGENT_HTTPS_PROXY` to route HTTPS traffic through a different proxy than HTTP traffic.
+
+```sh
+export GLOBAL_AGENT_HTTP_PROXY=http://my.corp.proxy.com:9090
+export GLOBAL_AGENT_HTTPS_PROXY=http://my.corp.proxy.com:9091
+wdio wdio.conf.js
+```
+
+`GLOBAL_AGENT_HTTP_PROXY` is used for both HTTP and HTTPS requests if `GLOBAL_AGENT_HTTPS_PROXY` is not set.
 
 If you use [Sauce Connect Proxy](https://wiki.saucelabs.com/display/DOCS/Sauce+Connect+Proxy), start it via:
 

@@ -1,13 +1,10 @@
-import type { CDPSession } from 'puppeteer-core'
-
+import type Interception from '../../utils/interception/index.js'
 import DevtoolsNetworkInterception from '../../utils/interception/devtools.js'
 import WebDriverNetworkInterception from '../../utils/interception/webdriver.js'
-
 import { getBrowserObject } from '../../utils/index.js'
-
 import type { Mock } from '../../types.js'
 import type { MockFilterOptions } from '../../utils/interception/types.js'
-import type Interception from '../../utils/interception/index.js'
+import type { CDPSession } from 'puppeteer-core/lib/esm/puppeteer/common/Connection.js'
 
 export const SESSION_MOCKS: Record<string, Set<Interception>> = {}
 export const CDP_SESSIONS: Record<string, CDPSession> = {}

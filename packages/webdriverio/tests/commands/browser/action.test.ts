@@ -2,10 +2,12 @@ import os from 'node:os'
 import path from 'node:path'
 import { describe, it, expect, beforeAll, vi, beforeEach } from 'vitest'
 
+// @ts-expect-error
+import got from 'got'
 import { remote, Key } from '../../../src/index.js'
 
 vi.mock('@wdio/logger', () => import(path.join(process.cwd(), '__mocks__', '@wdio/logger')))
-vi.mock('fetch')
+vi.mock('got')
 vi.mock('node:os')
 
 vi.mocked(os.type).mockReturnValue('Darwin')
@@ -23,7 +25,7 @@ describe('action command', () => {
     })
 
     beforeEach(() => {
-        vi.mocked(fetch).mockClear()
+        vi.mocked(got).mockClear()
     })
 
     it('should support key actions', async () => {
@@ -33,7 +35,7 @@ describe('action command', () => {
             .up('b')
             .perform()
 
-        const calls = vi.mocked(fetch).mock.calls
+        const calls = vi.mocked(got).mock.calls
         expect(calls).toHaveLength(2)
 
         const [
@@ -44,7 +46,7 @@ describe('action command', () => {
         expect(releaseActionUrl.pathname).toBe('/session/foobar-123/actions')
         expect(performActionParam.method).toBe('POST')
         expect(releaseActionParam.method).toBe('DELETE')
-        expect(JSON.parse(performActionParam.body)).toMatchSnapshot()
+        expect(performActionParam.json).toMatchSnapshot()
     })
 
     it('fails if user triggers more than one character', async () => {
@@ -57,18 +59,18 @@ describe('action command', () => {
         vi.mocked(os.type).mockReturnValue('Darwin')
         await browser.action('key', { id: 'foobar' })
             .down(Key.Ctrl).perform()
-        const calls = vi.mocked(fetch).mock.calls
+        const calls = vi.mocked(got).mock.calls
         const [[, performActionParam]] = calls as any
-        expect(JSON.parse(performActionParam.body).actions[0].actions[0].value).toBe(Key.Command)
+        expect(performActionParam.json.actions[0].actions[0].value).toBe(Key.Command)
     })
 
     it('should trigger control key when Key.Ctrl is used because we use Windows', async () => {
         vi.mocked(os.type).mockReturnValue('Windows')
         await browser.action('key', { id: 'foobar' })
             .down(Key.Ctrl).perform()
-        const calls = vi.mocked(fetch).mock.calls
+        const calls = vi.mocked(got).mock.calls
         const [[, performActionParam]] = calls as any
-        expect(JSON.parse(performActionParam.body).actions[0].actions[0].value).toBe(Key.Control)
+        expect(performActionParam.json.actions[0].actions[0].value).toBe(Key.Control)
     })
 
     it('should trigger command key when Key.Ctrl is used because platformName is mac', async () => {
@@ -77,9 +79,9 @@ describe('action command', () => {
         browser.capabilities.platformName = 'Mac OS'
         await browser.action('key', { id: 'foobar' })
             .down(Key.Ctrl).perform()
-        const calls = vi.mocked(fetch).mock.calls
+        const calls = vi.mocked(got).mock.calls
         const [[, performActionParam]] = calls as any
-        expect(JSON.parse(performActionParam.body).actions[0].actions[0].value).toBe(Key.Command)
+        expect(performActionParam.json.actions[0].actions[0].value).toBe(Key.Command)
     })
 
     it('should trigger control key when Key.Ctrl is used because os is mac, platformName is Windows 10 and host is remote', async () => {
@@ -89,9 +91,9 @@ describe('action command', () => {
         browser.capabilities.platformName = 'Windows 10'
         await browser.action('key', { id: 'foobar' })
             .down(Key.Ctrl).perform()
-        const calls = vi.mocked(fetch).mock.calls
+        const calls = vi.mocked(got).mock.calls
         const [[, performActionParam]] = calls as any
-        expect(JSON.parse(performActionParam.body).actions[0].actions[0].value).toBe(Key.Control)
+        expect(performActionParam.json.actions[0].actions[0].value).toBe(Key.Control)
     })
 
     it('should trigger command key when Key.Ctrl is used because os is mac and hostname is local', async () => {
@@ -101,9 +103,9 @@ describe('action command', () => {
         browser.options.hostname = 'local'
         await browser.action('key', { id: 'foobar' })
             .down(Key.Ctrl).perform()
-        const calls = vi.mocked(fetch).mock.calls
+        const calls = vi.mocked(got).mock.calls
         const [[, performActionParam]] = calls as any
-        expect(JSON.parse(performActionParam.body).actions[0].actions[0].value).toBe(Key.Command)
+        expect(performActionParam.json.actions[0].actions[0].value).toBe(Key.Command)
     })
 
     it('should trigger command key when Key.Ctrl is used because os is mac and hostname is 127.0.0.1', async () => {
@@ -113,9 +115,9 @@ describe('action command', () => {
         browser.options.hostname = '127.0.0.1'
         await browser.action('key', { id: 'foobar' })
             .down(Key.Ctrl).perform()
-        const calls = vi.mocked(fetch).mock.calls
+        const calls = vi.mocked(got).mock.calls
         const [[, performActionParam]] = calls as any
-        expect(JSON.parse(performActionParam.body).actions[0].actions[0].value).toBe(Key.Command)
+        expect(performActionParam.json.actions[0].actions[0].value).toBe(Key.Command)
     })
 
     it('should support pointer actions', async () => {
@@ -162,7 +164,7 @@ describe('action command', () => {
             .cancel()
             .perform()
 
-        const calls = vi.mocked(fetch).mock.calls
+        const calls = vi.mocked(got).mock.calls
         expect(calls).toHaveLength(2)
 
         const [
@@ -173,7 +175,7 @@ describe('action command', () => {
         expect(releaseActionUrl.pathname).toBe('/session/foobar-123/actions')
         expect(performActionParam.method).toBe('POST')
         expect(releaseActionParam.method).toBe('DELETE')
-        expect(JSON.parse(performActionParam.body)).toMatchSnapshot()
+        expect(performActionParam.json).toMatchSnapshot()
     })
 
     it('should support wheel actions', async () => {
@@ -188,7 +190,7 @@ describe('action command', () => {
             })
             .perform()
 
-        const calls = vi.mocked(fetch).mock.calls
+        const calls = vi.mocked(got).mock.calls
         expect(calls).toHaveLength(2)
 
         const [
@@ -199,24 +201,24 @@ describe('action command', () => {
         expect(releaseActionUrl.pathname).toBe('/session/foobar-123/actions')
         expect(performActionParam.method).toBe('POST')
         expect(releaseActionParam.method).toBe('DELETE')
-        expect(JSON.parse(performActionParam.body)).toMatchSnapshot()
+        expect(performActionParam.json).toMatchSnapshot()
     })
 
     it('resolves not resolved wdio elements in pointer action', async () => {
         await browser.action('pointer')
             .move({ origin: browser.$('#drag') })
             .perform()
-        const calls = vi.mocked(fetch).mock.calls
+        const calls = vi.mocked(got).mock.calls
         const [,, [, performActionParam]] = calls as any
-        expect(JSON.parse(performActionParam.body)).toMatchSnapshot()
+        expect(performActionParam.json).toMatchSnapshot()
     })
 
     it('resolves not resolved wdio elements in wheel action', async () => {
         await browser.action('wheel')
             .scroll({ origin: browser.$('#drag') })
             .perform()
-        const calls = vi.mocked(fetch).mock.calls
+        const calls = vi.mocked(got).mock.calls
         const [,, [, performActionParam]] = calls as any
-        expect(JSON.parse(performActionParam.body)).toMatchSnapshot()
+        expect(performActionParam.json).toMatchSnapshot()
     })
 })
